@@ -1,1 +1,0 @@
-print("Hello, Pokémon TCG tracker!")
