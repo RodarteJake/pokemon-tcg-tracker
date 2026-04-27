@@ -35,17 +35,17 @@ def get_cards_by_set(set_name):
     conn.close()
     return rows
 
-def add_card(card_id, name, set_name, number, rarity, market_price, image_url):
+def add_card(card_id, name, set_name, number, rarity, market_price, price_updated_at, image_url):
     """Add a new card to the cards table. Silently ignores duplicates."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
         """
         INSERT OR IGNORE INTO cards
-        (id, name, set_name, number, rarity, market_price, image_url)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        (id, name, set_name, number, rarity, market_price, price_updated_at, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (card_id, name, set_name, number, rarity, market_price, image_url)
+        (card_id, name, set_name, number, rarity, market_price, price_updated_at, image_url)
     )
     conn.commit()
     conn.close()
@@ -77,3 +77,18 @@ def get_total_collection_value():
     row = cursor.fetchone()
     conn.close()
     return row["total_value"] or 0
+
+def update_card_price(card_id, market_price, price_updated_at):
+    """Update the market price of an existing card."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE cards
+        SET market_price = ?, price_updated_at = ?
+        WHERE id = ?
+        """,
+        (market_price, price_updated_at, card_id)
+    )
+    conn.commit()
+    conn.close()
