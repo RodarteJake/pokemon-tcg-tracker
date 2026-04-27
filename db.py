@@ -18,7 +18,7 @@ def get_all_cards():
     return rows
 
 def get_card_by_id(card_id):
-    # Return a single card by its ID, or None if not found.
+    """Return a single card by its ID, or None if not found."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM cards WHERE id = ?", (card_id,))
@@ -27,7 +27,7 @@ def get_card_by_id(card_id):
     return row
 
 def get_cards_by_set(set_name):
-    # Return all cards from a given set. Returns an empty list if no cards found.
+    """Return all cards from a given set. Returns an empty list if no cards found."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM cards WHERE set_name = ?", (set_name,))
@@ -36,7 +36,7 @@ def get_cards_by_set(set_name):
     return rows
 
 def add_card(card_id, name, set_name, number, rarity, market_price, image_url):
-    # Add a new card to the cards table. Silently ignores duplicates.
+    """Add a new card to the cards table. Silently ignores duplicates."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
@@ -51,7 +51,7 @@ def add_card(card_id, name, set_name, number, rarity, market_price, image_url):
     conn.close()
 
 def add_owned_card(card_id, quantity, purchase_price, condition, acquired_date):
-    # Add a new owned card record. Silently ignores if card_id doesn't exist in cards table.
+    """Add a new owned card record. Silently ignores if card_id doesn't exist in cards table."""
     conn = get_connection()
     cursor = conn.cursor()  
     cursor.execute(
