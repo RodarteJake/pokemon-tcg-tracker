@@ -3,66 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <title>My Pokémon TCG Collection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, "Segoe UI", sans-serif;
-            background: #1a1a1a;
-            color: #eee;
+            font-family: "Inter", -apple-system, "Segoe UI", sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
             margin: 0;
-            padding: 24px;
+            padding: 32px;
+            min-height: 100vh;
         }
 
         h1 {
-            margin-bottom: 24px;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin: 0 0 32px 0;
+            color: white;
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin: 40px 0 16px 0;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 6px;
+            letter-spacing: -0.02em;
+            color: white;
+        }
+
+        .stat-value.positive {
+            color: #10b981;
+        }
+
+        .stat-value.negative {
+            color: #ef4444;
+        }
+
+        .by-set {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .by-set-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid #334155;
+            font-size: 14px;
+        }
+
+        .by-set-row:last-child {
+            border-bottom: none;
+        }
+
+        .by-set-row .set-name {
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .by-set-row .value {
+            font-family: "JetBrains Mono", monospace;
+            color: #10b981;
+            font-weight: 700;
+            font-size: 14px;
         }
 
         #cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 16px;
         }
 
         .card {
-            background: #2a2a2a;
+            background: #1e293b;
+            border: 1px solid #334155;
             border-radius: 8px;
             padding: 12px;
-            text-align: center;
+            transition: border-color 0.15s ease, transform 0.15s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: #38bdf8;
+            transform: translateY(-2px);
         }
 
         .card img {
             width: 100%;
             border-radius: 4px;
+            display: block;
         }
 
         .card-name {
-            font-weight: bold;
-            margin-top: 8px;
+            font-weight: 600;
+            margin-top: 12px;
+            color: white;
+            font-size: 14px;
         }
 
         .card-set {
             font-size: 12px;
-            color: #aaa;
+            color: #94a3b8;
+            margin-top: 2px;
         }
 
         .card-price {
-            margin-top: 4px;
-            color: #4ade80;
-            font-weight: bold;
+            font-family: "JetBrains Mono", monospace;
+            margin-top: 10px;
+            color: #10b981;
+            font-weight: 700;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
     <h1>My Collection</h1>
+
+    <div class="stats-bar" id="stats-bar">Loading stats...</div>
+
+    <h2>Value by Set</h2>
+    <div class="by-set" id="by-set">Loading...</div>
+
+    <h2>Cards</h2>
     <div id="cards-container">Loading...</div>
 
     <script>
+        async function loadStats() {
+            const [valueRes, spentRes] = await Promise.all([
+                fetch("/stats/total-value"),
+                fetch("/stats/total-spent")
+            ]);
+            const { total_value } = await valueRes.json();
+            const { total_spent } = await spentRes.json();
+            const gain = total_value - total_spent;
+            const gainClass = gain >= 0 ? "positive" : "negative";
+            const gainSign = gain >= 0 ? "+" : "";
+
+            document.getElementById("stats-bar").innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Value</div>
+                    <div class="stat-value positive">$${total_value.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Spent</div>
+                    <div class="stat-value">$${total_spent.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Gain / Loss</div>
+                    <div class="stat-value ${gainClass}">${gainSign}$${gain.toFixed(2)}</div>
+                </div>
+            `;
+        }
+
+        async function loadBySet() {
+            const response = await fetch("/stats/by-set");
+            const sets = await response.json();
+            const container = document.getElementById("by-set");
+            container.innerHTML = "";
+            for (const row of sets) {
+                const div = document.createElement("div");
+                div.className = "by-set-row";
+                div.innerHTML = `
+                    <span>${row.set_name}</span>
+                    <span class="value">$${row.set_value.toFixed(2)}</span>
+                `;
+                container.appendChild(div);
+            }
+        }
+
         async function loadCards() {
             const response = await fetch("/cards");
             const cards = await response.json();
-
             const container = document.getElementById("cards-container");
             container.innerHTML = "";
-
             for (const card of cards) {
                 const div = document.createElement("div");
                 div.className = "card";
@@ -76,6 +228,8 @@
             }
         }
 
+        loadStats();
+        loadBySet();
         loadCards();
     </script>
 </body>
