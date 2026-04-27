@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Pokémon TCG Collection</title>
+    <style>
+        body {
+            font-family: -apple-system, "Segoe UI", sans-serif;
+            background: #1a1a1a;
+            color: #eee;
+            margin: 0;
+            padding: 24px;
+        }
+
+        h1 {
+            margin-bottom: 24px;
+        }
+
+        #cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .card img {
+            width: 100%;
+            border-radius: 4px;
+        }
+
+        .card-name {
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .card-set {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .card-price {
+            margin-top: 4px;
+            color: #4ade80;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Collection</h1>
+    <div id="cards-container">Loading...</div>
+
+    <script>
+        async function loadCards() {
+            const response = await fetch("/cards");
+            const cards = await response.json();
+
+            const container = document.getElementById("cards-container");
+            container.innerHTML = "";
+
+            for (const card of cards) {
+                const div = document.createElement("div");
+                div.className = "card";
+                div.innerHTML = `
+                    <img src="${card.image_url}" alt="${card.name}">
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-set">${card.set_name}</div>
+                    <div class="card-price">$${card.market_price.toFixed(2)}</div>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        loadCards();
+    </script>
+</body>
+</html>
