@@ -33,7 +33,7 @@ cursor.execute("""
 
 # Insert sample cards
 sample_cards = [
-    """(id, name, set_name, number, rarity, market_price, price_updated_at, image_url)"""
+    # (id, name, set_name, number, rarity, market_price, price_updated_at, image_url) 
     ("base1-4",   "Charizard",  "Base",        "4",    "Rare Holo", 350.00, "2026-04-27", "https://images.pokemontcg.io/base1/4.png"),
     ("base1-2",   "Blastoise",  "Base",        "2",    "Rare Holo", 120.00, "2026-04-27", "https://images.pokemontcg.io/base1/2.png"),
     ("base1-15",  "Venusaur",   "Base",        "15",   "Rare Holo",  90.00, "2026-04-27", "https://images.pokemontcg.io/base1/15.png"),
@@ -57,7 +57,7 @@ cursor.executemany(
 
 # Insert sample ownership records
 sample_owned = [
-    """(card_id, quantity, purchase_price, condition, acquired_date)"""
+    # (card_id, quantity, purchase_price, condition, acquired_date)
     ("base1-4",    1, 280.00, "Near Mint",        "2024-08-15"),
     ("base1-4",    1, 150.00, "Lightly Played",   "2025-02-03"),
     ("base1-2",    2,  95.00, "Near Mint",        "2024-11-20"),
