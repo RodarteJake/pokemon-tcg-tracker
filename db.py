@@ -92,3 +92,4 @@ def update_card_price(card_id, market_price, price_updated_at):
     )
     conn.commit()
     conn.close()
+

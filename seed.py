@@ -39,9 +39,9 @@ sample_cards = [
     ("base1-15",  "Venusaur",   "Base",        "15",   "Rare Holo",  90.00, "2026-04-27", "https://images.pokemontcg.io/base1/15.png"),
     ("base1-58",  "Pikachu",    "Base",        "58",   "Common",      8.00, "2026-04-27", "https://images.pokemontcg.io/base1/58.png"),
     ("base1-10",  "Mewtwo",     "Base",        "10",   "Rare Holo",  75.00, "2026-04-27", "https://images.pokemontcg.io/base1/10.png"),
-    ("jungle-12", "Jolteon",    "Jungle",      "4",    "Rare Holo",  35.00, "2026-04-27", "https://images.pokemontcg.io/jungle/4.png"),
-    ("jungle-51", "Eevee",      "Jungle",      "51",   "Common",      3.00, "2026-04-27", "https://images.pokemontcg.io/jungle/51.png"),
-    ("fossil-2",  "Articuno",   "Fossil",      "2",    "Rare Holo",  45.00, "2026-04-27", "https://images.pokemontcg.io/fossil/2.png"),
+    ("base2-4", "Jolteon",    "Jungle",      "4",    "Rare Holo",  35.00, "2026-04-27", "https://images.pokemontcg.io/base2/4.png"),
+    ("base2-51", "Eevee",      "Jungle",      "51",   "Common",      3.00, "2026-04-27", "https://images.pokemontcg.io/base2/51.png"),
+    ("base3-2",  "Articuno",   "Fossil",      "2",    "Rare Holo",  45.00, "2026-04-27", "https://images.pokemontcg.io/base3/2.png"),
     ("neo1-9",    "Lugia",      "Neo Genesis", "9",    "Rare Holo", 220.00, "2026-04-27", "https://images.pokemontcg.io/neo1/9.png"),
     ("swsh4-25",  "Charizard",  "Vivid Voltage","25",  "Rare",       12.00, "2026-04-27", "https://images.pokemontcg.io/swsh4/25.png"),
 ]
@@ -62,8 +62,8 @@ sample_owned = [
     ("base1-4",    1, 150.00, "Lightly Played",   "2025-02-03"),
     ("base1-2",    2,  95.00, "Near Mint",        "2024-11-20"),
     ("base1-58",   4,   2.00, "Near Mint",        "2025-01-10"),
-    ("jungle-51",  3,   1.50, "Lightly Played",   "2025-03-22"),
-    ("fossil-2",   1,  40.00, "Near Mint",        "2025-06-01"),
+    ("base2-51",  3,   1.50, "Lightly Played",   "2025-03-22"),
+    ("base3-2",   1,  40.00, "Near Mint",        "2025-06-01"),
     ("neo1-9",     1, 180.00, "Near Mint",        "2024-12-25"),
     ("swsh4-25",   2,  10.00, "Near Mint",        "2026-01-15"),
 ]
