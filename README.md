@@ -12,9 +12,9 @@ A personal Pokémon Trading Card Game collection tracker with live pricing, stat
 
 ## Screenshots
 
-![alt text](image.png)
+![dashboard](dashboard.png)
 
-![alt text](image2.png)
+![search](search.png)
 
 ## Tech stack
 
