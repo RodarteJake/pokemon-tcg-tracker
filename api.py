@@ -8,14 +8,16 @@ def fetch_card_by_id(card_id):
     response.raise_for_status()
     return response.json()["data"]
 
-def search_cards_by_name(name):
-    """Search the Pokémon TCG API for cards matching a name. Returns a list."""
-    response = requests.get(
-        f"{BASE_URL}/cards",
-        params={"q": f'name:"{name}"'}
-    )
+def search_cards_by_name(name, page=1, page_size=12):
+    """Search the Pokémon TCG API. Returns full pagination envelope: data, page, pageSize, totalCount."""
+    params = {
+        "q": f'name:"{name}"',
+        "page": page,
+        "pageSize": page_size,
+    }
+    response = requests.get(f"{BASE_URL}/cards", params=params)
     response.raise_for_status()
-    return response.json()["data"]
+    return response.json()  
 
 def extract_market_price(card_data):
     """Pick the highest 'market' price across all TCGPlayer variants. Returns None if no pricing available."""
