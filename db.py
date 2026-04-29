@@ -140,3 +140,57 @@ def get_ownership_rows(card_id):
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+def update_owned_card(owned_id, quantity, purchase_price, condition, acquired_date):
+    """Update an existing ownership row with new values."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE owned_cards
+           SET quantity = ?,
+               purchase_price = ?,
+               condition = ?,
+               acquired_date = ?
+         WHERE id = ?
+        """,
+        (quantity, purchase_price, condition, acquired_date, owned_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def delete_owned_card(owned_id):
+    """Delete an ownership row by id. Returns the card_id of the deleted row, for cascade logic."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Find the card_id first so caller can decide whether to cascade
+    cursor.execute("SELECT card_id FROM owned_cards WHERE id = ?", (owned_id,))
+    row = cursor.fetchone()
+    if row is None:
+        conn.close()
+        return None
+    card_id = row["card_id"]
+    cursor.execute("DELETE FROM owned_cards WHERE id = ?", (owned_id,))
+    conn.commit()
+    conn.close()
+    return card_id
+
+
+def count_ownership_rows(card_id):
+    """Return how many ownership rows exist for the given card_id."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) AS cnt FROM owned_cards WHERE card_id = ?", (card_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return row["cnt"]
+
+
+def delete_card(card_id):
+    """Delete a card from the cards table by id."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM cards WHERE id = ?", (card_id,))
+    conn.commit()
+    conn.close()

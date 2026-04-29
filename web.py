@@ -104,6 +104,39 @@ def acquire(request: AcquireRequest):
     )
     return {"status": "ok"}
 
+class UpdateOwnedRequest(BaseModel):
+    quantity: int
+    purchase_price: float | None = None
+    condition: str
+    acquired_date: str | None = None
+
+
+@app.patch("/collection/owned/{owned_id}")
+def update_owned(owned_id: int, body: UpdateOwnedRequest):
+    """Update an existing ownership row."""
+    db.update_owned_card(
+        owned_id=owned_id,
+        quantity=body.quantity,
+        purchase_price=body.purchase_price,
+        condition=body.condition,
+        acquired_date=body.acquired_date,
+    )
+    return {"status": "ok"}
+
+
+@app.delete("/collection/owned/{owned_id}")
+def delete_owned(owned_id: int):
+    """Delete an ownership row. Cascades: if it was the last row for that card, also delete the card."""
+    card_id = db.delete_owned_card(owned_id)
+    if card_id is None:
+        return {"status": "not_found"}
+
+    remaining = db.count_ownership_rows(card_id)
+    if remaining == 0:
+        db.delete_card(card_id)
+        return {"status": "ok", "cascade_deleted_card": True}
+    return {"status": "ok", "cascade_deleted_card": False}
+
 @app.get("/api/filters/sets")
 def filter_sets():
     return api.get_sets()

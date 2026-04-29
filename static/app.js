@@ -245,7 +245,7 @@ function setupDropdown(filterKey, options, placeholder) {
 
 // -------- Search & pagination --------
 
-let currentAcquireCard = null;
+let currentDetailCardId = null;
 
 let searchState = {
   page: 1,
@@ -386,17 +386,13 @@ function closeModal() {
   currentAcquireCard = null;
 }
 
-async function openDetail(cardId) {
-  // 1. Fetch card metadata and ownership rows in parallel
-  // 2. Build the HTML for the card info section (#detail-card-info)
-  // 3. Build the HTML for the ownership list (#detail-ownership-list)
-  // 4. Open the modal by adding the "open" class to #detail-overlay
 
+async function openDetail(cardId) {
+  currentDetailCardId = cardId;
   const [card, ownership] = await Promise.all([
     fetch(`/cards/${cardId}`).then(r => r.json()),
     fetch(`/cards/${cardId}/ownership`).then(r => r.json())
   ]);
-
   document.getElementById("detail-card-info").innerHTML = `
     <img src="${card.image_url}" alt="${card.name}">
     <div class="info">
@@ -404,7 +400,7 @@ async function openDetail(cardId) {
       <div class="set">${card.set_name} · #${card.number}</div>
       <div class="market-label">Current Market Value</div>
       <div class="market-value">$${card.market_price.toFixed(2)}</div>
-    </div>
+      </div>
   `;
 
   const ownershipList = document.getElementById("detail-ownership-list");
@@ -426,6 +422,15 @@ async function openDetail(cardId) {
           <div class="meta">Acquired ${row.acquired_date || "unknown date"}</div>
         </div>
         <div class="price">${row.purchase_price !== null ? `$${row.purchase_price.toFixed(2)}` : "—"}</div>
+        <div class="actions">
+          <button class="icon-btn" data-owned-id="${row.id}" data-action="edit">Edit</button>
+          <button class="icon-btn danger" data-owned-id="${row.id}" data-action="delete">Delete</button>
+        </div>
+        <div class="confirm-delete">
+          <span class="confirm-text">Delete this row?</span>
+          <button class="icon-btn danger" data-owned-id="${row.id}" data-action="confirm-delete">Confirm</button>
+          <button class="icon-btn" data-owned-id="${row.id}" data-action="cancel-delete">Cancel</button>
+        </div>
       `;
       ownershipList.appendChild(div);
     }
@@ -436,6 +441,29 @@ async function openDetail(cardId) {
 
 function closeDetail() {
   document.getElementById("detail-overlay").classList.remove("open");
+}
+
+async function deleteOwnedRow(ownedId) {
+  try {
+    const response = await fetch(`/collection/owned/${ownedId}`, {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to delete owned row.");
+    }
+
+    if (data.cascade_deleted_card) {
+      closeDetail();
+    } else {
+      openDetail(currentDetailCardId);
+    }
+  } catch (err) {
+    alert("Unable to delete owned row: " + err.message);
+  } finally {
+    refreshAll();
+  }
 }
 
 // -------- Event wiring --------
@@ -517,6 +545,26 @@ document.getElementById("cards-container").addEventListener("click", (e) => {
 document.getElementById("detail-close").addEventListener("click", closeDetail);
 
 document.getElementById("refresh-prices-button").addEventListener("click", refreshPrices);
+
+document.getElementById("detail-ownership-list").addEventListener("click", (e) => {
+  const button = e.target.closest(".icon-btn");
+  if (!button) return;
+  const ownedId = button.dataset.ownedId;
+  const action = button.dataset.action;
+  const row = button.closest(".ownership-row");
+
+  switch (action) {
+    case "delete":
+      row.classList.add("confirming");
+      break;
+    case "cancel-delete":
+      row.classList.remove("confirming");
+      break;
+    case "confirm-delete":
+      deleteOwnedRow(ownedId);
+      break;
+  }
+});
 
 // -------- Initial load --------
 
