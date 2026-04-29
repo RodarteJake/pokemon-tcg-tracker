@@ -51,6 +51,7 @@ async function loadCards() {
   for (const card of cards) {
     const div = document.createElement("div");
     div.className = "card";
+    div.dataset.cardId = card.id;
     div.innerHTML = `
       <img src="${card.image_url}" alt="${card.name}">
       <div class="card-name">${card.name}</div>
@@ -385,6 +386,58 @@ function closeModal() {
   currentAcquireCard = null;
 }
 
+async function openDetail(cardId) {
+  // 1. Fetch card metadata and ownership rows in parallel
+  // 2. Build the HTML for the card info section (#detail-card-info)
+  // 3. Build the HTML for the ownership list (#detail-ownership-list)
+  // 4. Open the modal by adding the "open" class to #detail-overlay
+
+  const [card, ownership] = await Promise.all([
+    fetch(`/cards/${cardId}`).then(r => r.json()),
+    fetch(`/cards/${cardId}/ownership`).then(r => r.json())
+  ]);
+
+  document.getElementById("detail-card-info").innerHTML = `
+    <img src="${card.image_url}" alt="${card.name}">
+    <div class="info">
+      <div class="name">${card.name}</div>
+      <div class="set">${card.set_name} · #${card.number}</div>
+      <div class="market-label">Current Market Value</div>
+      <div class="market-value">$${card.market_price.toFixed(2)}</div>
+    </div>
+  `;
+
+  const ownershipList = document.getElementById("detail-ownership-list");
+  ownershipList.innerHTML = "";
+
+  if (ownership.length === 0) {
+    document.getElementById("detail-ownership-header").textContent =
+      "You don't own any copies of this card.";
+  } else {
+    document.getElementById("detail-ownership-header").textContent =
+      `You own ${ownership.length} ${ownership.length === 1 ? "copy" : "copies"} of this card:`;
+
+    for (const row of ownership) {
+      const div = document.createElement("div");
+      div.className = "ownership-row";
+      div.innerHTML = `
+        <div class="left">
+          <div class="condition">${row.condition} × ${row.quantity}</div>
+          <div class="meta">Acquired ${row.acquired_date || "unknown date"}</div>
+        </div>
+        <div class="price">${row.purchase_price !== null ? `$${row.purchase_price.toFixed(2)}` : "—"}</div>
+      `;
+      ownershipList.appendChild(div);
+    }
+  }
+
+  document.getElementById("detail-overlay").classList.add("open");
+}
+
+function closeDetail() {
+  document.getElementById("detail-overlay").classList.remove("open");
+}
+
 // -------- Event wiring --------
 
 document.getElementById("search-button").addEventListener("click", () => doSearch(true));
@@ -403,11 +456,23 @@ document.querySelectorAll(".filter input").forEach(input => {
 });
 
 document.getElementById("modal-close").addEventListener("click", closeModal);
+
 document.getElementById("modal-overlay").addEventListener("click", (e) => {
   if (e.target.id === "modal-overlay") closeModal();
 });
+
+document.getElementById("detail-overlay").addEventListener("click", (e) => {
+  if (e.target.id === "detail-overlay") closeDetail();
+});
+
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeModal();
+  if (e.key === "Escape") {
+    if (document.getElementById("detail-overlay").classList.contains("open")) {
+      closeDetail();
+    } else {
+      closeModal();
+    }
+  }
 });
 
 document.getElementById("acquire-form").addEventListener("submit", async (e) => {
@@ -442,6 +507,14 @@ document.getElementById("acquire-form").addEventListener("submit", async (e) => 
     submitBtn.textContent = "Add to Collection";
   }
 });
+
+document.getElementById("cards-container").addEventListener("click", (e) => {
+  const cardDiv = e.target.closest(".card");
+  if (!cardDiv) return;
+  openDetail(cardDiv.dataset.cardId);
+});
+
+document.getElementById("detail-close").addEventListener("click", closeDetail);
 
 document.getElementById("refresh-prices-button").addEventListener("click", refreshPrices);
 

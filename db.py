@@ -128,3 +128,15 @@ def get_value_by_set():
     rows = cursor.fetchall()
     conn.close()
     return rows 
+
+def get_ownership_rows(card_id):
+    """Return all ownership rows in owned_cards for the given card_id, newest first."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM owned_cards WHERE card_id = ? ORDER BY acquired_date DESC",
+        (card_id,),
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    return rows

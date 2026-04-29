@@ -35,6 +35,11 @@ def get_card(card_id: str):
         return {"error": "Card not found"}
     return dict(row)
 
+@app.get("/cards/{card_id}/ownership")
+def card_ownership(card_id: str):
+    """Return all ownership rows for a given card."""
+    return db.get_ownership_rows(card_id)
+
 @app.get("/stats/total-value")
 def total_value():
     return {"total_value": db.get_total_collection_value()}

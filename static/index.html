@@ -13,70 +13,71 @@
 
   <div class="search-panel">
     <div class="filter-row">
-    <div class="filter">
-      <label>Name</label>
-      <input type="text" id="filter-name" placeholder="e.g. Arcanine">
+      <div class="filter">
+        <label>Name</label>
+        <input type="text" id="filter-name" placeholder="e.g. Arcanine">
+      </div>
+      <div class="filter">
+        <label>Set</label>
+        <div class="searchable-dropdown" data-filter="set"></div>
+      </div>
+      <div class="filter">
+        <label>Rarity</label>
+        <div class="searchable-dropdown" data-filter="rarity"></div>
+      </div>
+      <div class="filter">
+        <label>Type</label>
+        <div class="searchable-dropdown" data-filter="type"></div>
+      </div>
+      <div class="filter">
+        <label>Supertype</label>
+        <div class="searchable-dropdown" data-filter="supertype"></div>
+      </div>
     </div>
-    <div class="filter">
-      <label>Set</label>
-      <div class="searchable-dropdown" data-filter="set"></div>
-    </div>
-    <div class="filter">
-      <label>Rarity</label>
-      <div class="searchable-dropdown" data-filter="rarity"></div>
-    </div>
-    <div class="filter">
-      <label>Type</label>
-      <div class="searchable-dropdown" data-filter="type"></div>
-    </div>
-    <div class="filter">
-      <label>Supertype</label>
-      <div class="searchable-dropdown" data-filter="supertype"></div>
-    </div>
-  </div>
 
-  <button class="advanced-toggle" id="advanced-toggle" type="button">
-    <span id="advanced-toggle-icon">▸</span> Advanced filters
-  </button>
+    <button class="advanced-toggle" id="advanced-toggle" type="button">
+      <span id="advanced-toggle-icon">▸</span> Advanced filters
+    </button>
 
-  <div class="filter-row advanced-filters" id="advanced-filters">
-    <div class="filter">
-      <label>Subtype</label>
-      <div class="searchable-dropdown" data-filter="subtype"></div>
+    <div class="filter-row advanced-filters" id="advanced-filters">
+      <div class="filter">
+        <label>Subtype</label>
+        <div class="searchable-dropdown" data-filter="subtype"></div>
+      </div>
+      <div class="filter">
+        <label>Series</label>
+        <input type="text" id="filter-series" placeholder="e.g. Sword & Shield">
+      </div>
+      <div class="filter">
+        <label>Artist</label>
+        <input type="text" id="filter-artist" placeholder="e.g. Mitsuhiro Arita">
+      </div>
+      <div class="filter filter-narrow">
+        <label>HP min</label>
+        <input type="number" id="filter-hp-min" min="0" placeholder="0">
+      </div>
+      <div class="filter filter-narrow">
+        <label>HP max</label>
+        <input type="number" id="filter-hp-max" min="0" placeholder="500">
+      </div>
     </div>
-    <div class="filter">
-      <label>Series</label>
-      <input type="text" id="filter-series" placeholder="e.g. Sword & Shield">
-    </div>
-    <div class="filter">
-      <label>Artist</label>
-      <input type="text" id="filter-artist" placeholder="e.g. Mitsuhiro Arita">
-    </div>
-    <div class="filter filter-narrow">
-      <label>HP min</label>
-      <input type="number" id="filter-hp-min" min="0" placeholder="0">
-    </div>
-    <div class="filter filter-narrow">
-      <label>HP max</label>
-      <input type="number" id="filter-hp-max" min="0" placeholder="500">
-    </div>
-  </div>
 
-  <div class="search-controls">
-    <select id="page-size-select">
-      <option value="12">12 per page</option>
-      <option value="24">24 per page</option>
-      <option value="48">48 per page</option>
-    </select>
-    <button id="clear-filters">Clear</button>
-    <button id="search-button">Search</button>
-  </div>
+    <div class="search-controls">
+      <select id="page-size-select">
+        <option value="12">12 per page</option>
+        <option value="24">24 per page</option>
+        <option value="48">48 per page</option>
+      </select>
+      <button id="clear-filters">Clear</button>
+      <button id="search-button">Search</button>
+    </div>
   </div>
 
   <div id="search-results"></div>
 
   <div id="pagination" class="pagination"></div>
 
+  <!-- Acquire modal -->
   <div id="modal-overlay">
     <div id="modal-panel">
       <button id="modal-close">×</button>
@@ -109,6 +110,16 @@
     </div>
   </div>
 
+  <!-- Card detail modal -->
+  <div id="detail-overlay">
+    <div id="detail-panel">
+      <button id="detail-close">×</button>
+      <div id="detail-card-info"></div>
+      <h3 id="detail-ownership-header"></h3>
+      <div id="detail-ownership-list"></div>
+    </div>
+  </div>
+
   <div class="price-status" id="price-status">
     <span class="price-status-label">
       Prices last updated: <span id="price-status-date">…</span>
@@ -124,6 +135,6 @@
   <h2>Cards</h2>
   <div id="cards-container">Loading...</div>
 
-<script src="/static/app.js"></script>
+  <script src="/static/app.js"></script>
 </body>
 </html>
