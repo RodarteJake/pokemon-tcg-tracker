@@ -431,6 +431,20 @@ async function openDetail(cardId) {
           <button class="icon-btn danger" data-owned-id="${row.id}" data-action="confirm-delete">Confirm</button>
           <button class="icon-btn" data-owned-id="${row.id}" data-action="cancel-delete">Cancel</button>
         </div>
+        <div class="edit-form">
+          <input type="number" class="edit-quantity" min="1" value="${row.quantity}">
+          <select class="edit-condition">
+            <option ${row.condition === "Near Mint" ? "selected" : ""}>Near Mint</option>
+            <option ${row.condition === "Lightly Played" ? "selected" : ""}>Lightly Played</option>
+            <option ${row.condition === "Moderately Played" ? "selected" : ""}>Moderately Played</option>
+            <option ${row.condition === "Heavily Played" ? "selected" : ""}>Heavily Played</option>
+            <option ${row.condition === "Damaged" ? "selected" : ""}>Damaged</option>
+          </select>
+          <input type="number" class="edit-price" step="0.01" min="0" value="${row.purchase_price ?? ''}" placeholder="Price">
+          <input type="date" class="edit-date" value="${row.acquired_date ?? ''}">
+          <button class="icon-btn" data-owned-id="${row.id}" data-action="save-edit">Save</button>
+          <button class="icon-btn" data-owned-id="${row.id}" data-action="cancel-edit">Cancel</button>
+        </div>
       `;
       ownershipList.appendChild(div);
     }
@@ -467,6 +481,48 @@ async function deleteOwnedRow(ownedId) {
 }
 
 // -------- Event wiring --------
+
+async function saveOwnedEdit(row, ownedId) {
+  try {
+    const quantityInput = row.querySelector(".edit-quantity");
+    const conditionInput = row.querySelector(".edit-condition");
+    const priceInput = row.querySelector(".edit-price");
+    const dateInput = row.querySelector(".edit-date");
+
+    const quantity = parseInt(quantityInput.value, 10);
+    const condition = conditionInput.value;
+    const purchase_price = priceInput.value !== "" ? parseFloat(priceInput.value) : null;
+    const acquired_date = dateInput.value || null;
+
+    if (Number.isNaN(quantity) || quantity < 1) {
+      throw new Error("Quantity must be at least 1.");
+    }
+
+    const body = {
+      quantity,
+      condition,
+      purchase_price,
+      acquired_date,
+    };
+
+    const response = await fetch(`/collection/owned/${ownedId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to update owned row.");
+    }
+
+    openDetail(currentDetailCardId);
+  } catch (err) {
+    alert("Unable to save owned row: " + err.message);
+  } finally {
+    refreshAll();
+  }
+}
 
 document.getElementById("search-button").addEventListener("click", () => doSearch(true));
 document.getElementById("clear-filters").addEventListener("click", clearFilters);
@@ -563,6 +619,15 @@ document.getElementById("detail-ownership-list").addEventListener("click", (e) =
     case "confirm-delete":
       deleteOwnedRow(ownedId);
       break;
+    case "edit":
+      row.classList.add("editing");
+      break;
+    case "cancel-edit":
+      row.classList.remove("editing");
+      break;
+    case "save-edit":
+      saveOwnedEdit(row, ownedId);
+     break;
   }
 });
 

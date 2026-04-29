@@ -787,3 +787,42 @@ h2 {
   font-weight: 600;
   margin-right: 4px;
 }
+
+/* Inline edit form */
+.ownership-row .edit-form {
+  display: none;
+  flex: 1;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ownership-row.editing .left,
+.ownership-row.editing .price,
+.ownership-row.editing .actions {
+  display: none;
+}
+
+.ownership-row.editing .edit-form {
+  display: flex;
+}
+
+.edit-form input,
+.edit-form select {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  outline: none;
+}
+
+.edit-form input:focus,
+.edit-form select:focus { border-color: #38bdf8; }
+
+.edit-quantity { width: 60px; }
+.edit-price { width: 90px; }
+.edit-date { width: 140px; }
+.edit-condition { width: 150px; }
