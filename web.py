@@ -51,9 +51,35 @@ def by_set():
     return [dict(row) for row in rows]
 
 @app.get("/api/search")
-def search(name: str, page: int = 1, page_size: int = 12):
-    """Search the Pokémon TCG API. Returns a pagination envelope: data, page, pageSize, totalCount."""
-    return api.search_cards_by_name(name, page=page, page_size=page_size)
+def search(
+    name: str | None = None,
+    set_id: str | None = None,
+    rarity: str | None = None,
+    types: str | None = None,
+    supertype: str | None = None,
+    subtype: str | None = None,
+    artist: str | None = None,
+    series: str | None = None,
+    hp_min: int | None = None,
+    hp_max: int | None = None,
+    page: int = 1,
+    page_size: int = 12,
+):
+    """Search the Pokémon TCG API with arbitrary filters."""
+    return api.search_cards(
+        name=name,
+        set_id=set_id,
+        rarity=rarity,
+        types=types,
+        supertype=supertype,
+        subtype=subtype,
+        artist=artist,
+        series=series,
+        hp_min=hp_min,
+        hp_max=hp_max,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @app.post("/collection/acquire")
@@ -67,6 +93,30 @@ def acquire(request: AcquireRequest):
         acquired_date=request.acquired_date,
     )
     return {"status": "ok"}
+
+@app.get("/api/filters/sets")
+def filter_sets():
+    return api.get_sets()
+
+
+@app.get("/api/filters/types")
+def filter_types():
+    return api.get_types()
+
+
+@app.get("/api/filters/subtypes")
+def filter_subtypes():
+    return api.get_subtypes()
+
+
+@app.get("/api/filters/supertypes")
+def filter_supertypes():
+    return api.get_supertypes()
+
+
+@app.get("/api/filters/rarities")
+def filter_rarities():
+    return api.get_rarities()
 
 # Serve all files in /static at the /static URL path
 app.mount("/static", StaticFiles(directory="static"), name="static")
