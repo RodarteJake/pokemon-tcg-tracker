@@ -81,6 +81,11 @@ def search(
         page_size=page_size,
     )
 
+@app.post("/collection/refresh-prices")
+def refresh_prices():
+    """Refresh market prices for every card in the collection."""
+    collection.refresh_all_prices()
+    return {"status": "ok"}
 
 @app.post("/collection/acquire")
 def acquire(request: AcquireRequest):
@@ -117,6 +122,10 @@ def filter_supertypes():
 @app.get("/api/filters/rarities")
 def filter_rarities():
     return api.get_rarities()
+
+@app.get("/stats/last-updated")
+def last_updated():
+    return {"last_updated": db.get_last_price_update()}
 
 # Serve all files in /static at the /static URL path
 app.mount("/static", StaticFiles(directory="static"), name="static")

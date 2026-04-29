@@ -555,3 +555,43 @@ h2 {
   background: #1e293b;
   color: white;
 }
+
+/* --- Price status bar --- */
+.price-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.price-status-label #price-status-date {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+#refresh-prices-button {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#refresh-prices-button:hover:not(:disabled) {
+  border-color: #38bdf8;
+}
+
+#refresh-prices-button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}

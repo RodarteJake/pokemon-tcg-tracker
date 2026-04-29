@@ -65,6 +65,33 @@ function refreshAll() {
   loadStats();
   loadBySet();
   loadCards();
+  loadLastUpdated();
+}
+
+async function loadLastUpdated() {
+  const response = await fetch("/stats/last-updated");
+  const { last_updated } = await response.json();
+  const el = document.getElementById("price-status-date");
+  el.textContent = last_updated || "never";
+}
+
+async function refreshPrices() {
+  const button = document.getElementById("refresh-prices-button");
+  button.disabled = true;
+  button.textContent = "Refreshing…";
+
+  try {
+    const response = await fetch("/collection/refresh-prices", { method: "POST" });
+    if (!response.ok) throw new Error("Server error");
+    // Reload everything that depends on prices
+    refreshAll();
+    loadLastUpdated();
+  } catch (err) {
+    alert("Failed to refresh prices: " + err.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Refresh prices";
+  }
 }
 
 // -------- Searchable dropdown component --------
@@ -415,6 +442,8 @@ document.getElementById("acquire-form").addEventListener("submit", async (e) => 
     submitBtn.textContent = "Add to Collection";
   }
 });
+
+document.getElementById("refresh-prices-button").addEventListener("click", refreshPrices);
 
 // -------- Initial load --------
 

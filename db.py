@@ -35,6 +35,15 @@ def get_cards_by_set(set_name):
     conn.close()
     return rows
 
+def get_last_price_update():
+    """Return the most recent price_updated_at timestamp across all cards. None if no cards."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT MAX(price_updated_at) AS last_updated FROM cards")
+    row = cursor.fetchone()
+    conn.close()
+    return row["last_updated"]
+
 def add_card(card_id, name, set_name, number, rarity, market_price, price_updated_at, image_url):
     """Add a new card to the cards table. Silently ignores duplicates."""
     conn = get_connection()
