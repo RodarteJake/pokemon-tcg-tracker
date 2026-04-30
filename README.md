@@ -70,3 +70,7 @@ Card data and pricing courtesy of the [Pokémon TCG API](https://docs.pokemontcg
 ## License
 
 MIT — see LICENSE file
+
+## Credits
+
+Favicon: [Pokemon icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/pokemon)
