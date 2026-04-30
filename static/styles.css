@@ -859,3 +859,116 @@ h2 {
   max-width: 400px;
   margin: 0 auto;
 }
+
+/* --- Skeleton loaders --- */
+@keyframes skeleton-pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
+
+.skeleton {
+  background: #334155;
+  border-radius: 4px;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-stat-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.skeleton-stat-card .skeleton-label {
+  height: 11px;
+  width: 80px;
+  margin-bottom: 12px;
+}
+
+.skeleton-stat-card .skeleton-value {
+  height: 28px;
+  width: 140px;
+}
+
+.skeleton-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #334155;
+}
+
+.skeleton-row:last-child { border-bottom: none; }
+
+.skeleton-row .skeleton-text-l { height: 14px; width: 140px; }
+.skeleton-row .skeleton-text-r { height: 14px; width: 70px; }
+
+.skeleton-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.skeleton-card .skeleton-image {
+  width: 100%;
+  aspect-ratio: 0.72; /* matches Pokémon card proportions */
+  margin-bottom: 12px;
+}
+
+.skeleton-card .skeleton-name {
+  height: 14px;
+  width: 70%;
+  margin-bottom: 6px;
+}
+
+.skeleton-card .skeleton-set {
+  height: 12px;
+  width: 50%;
+  margin-bottom: 10px;
+}
+
+.skeleton-card .skeleton-price {
+  height: 16px;
+  width: 60px;
+}
+
+.load-error {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.load-error-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.load-error-icon {
+  color: #ef4444;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.load-error-retry {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.load-error-retry:hover {
+  border-color: #38bdf8;
+}

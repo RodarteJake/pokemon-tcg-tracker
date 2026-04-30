@@ -1,36 +1,90 @@
 // -------- Data loaders --------
 
-async function loadStats() {
-  const [valueRes, spentRes] = await Promise.all([
-    fetch("/stats/total-value"),
-    fetch("/stats/total-spent")
-  ]);
-  const { total_value } = await valueRes.json();
-  const { total_spent } = await spentRes.json();
-  const gain = total_value - total_spent;
-  const gainClass = gain >= 0 ? "positive" : "negative";
-  const gainSign = gain >= 0 ? "+" : "";
-
-  document.getElementById("stats-bar").innerHTML = `
-    <div class="stat-card">
-      <div class="stat-label">Total Value</div>
-      <div class="stat-value positive">$${total_value.toFixed(2)}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Total Spent</div>
-      <div class="stat-value">$${total_spent.toFixed(2)}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Gain / Loss</div>
-      <div class="stat-value ${gainClass}">${gainSign}$${gain.toFixed(2)}</div>
+function renderLoadError(container, retryFn) {
+  container.innerHTML = `
+    <div class="load-error">
+      <div class="load-error-message">
+        <span class="load-error-icon">⚠</span>
+        <span>Couldn't load. Check your connection or try again.</span>
+      </div>
+      <button class="load-error-retry">Retry</button>
     </div>
   `;
+  container.querySelector(".load-error-retry").addEventListener("click", retryFn);
+}
+
+async function loadStats() {
+  const statsBar = document.getElementById("stats-bar");
+  statsBar.innerHTML = `
+    <div class="skeleton-stat-card">
+      <div class="skeleton skeleton-label"></div>
+      <div class="skeleton skeleton-value"></div>
+    </div>
+    <div class="skeleton-stat-card">
+      <div class="skeleton skeleton-label"></div>
+      <div class="skeleton skeleton-value"></div>
+    </div>
+    <div class="skeleton-stat-card">
+      <div class="skeleton skeleton-label"></div>
+      <div class="skeleton skeleton-value"></div>
+    </div>
+  `;
+
+  try {
+    const [valueRes, spentRes] = await Promise.all([
+      fetch("/stats/total-value"),
+      fetch("/stats/total-spent")
+    ]);
+    if (!valueRes.ok || !spentRes.ok) throw new Error("Failed to fetch stats");
+    const { total_value } = await valueRes.json();
+    const { total_spent } = await spentRes.json();
+    const gain = total_value - total_spent;
+    const gainClass = gain >= 0 ? "positive" : "negative";
+    const gainSign = gain >= 0 ? "+" : "";
+
+    statsBar.innerHTML = `
+      <div class="stat-card">
+        <div class="stat-label">Total Value</div>
+        <div class="stat-value positive">$${total_value.toFixed(2)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Spent</div>
+        <div class="stat-value">$${total_spent.toFixed(2)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Gain / Loss</div>
+        <div class="stat-value ${gainClass}">${gainSign}$${gain.toFixed(2)}</div>
+      </div>
+    `;
+  } catch (err) {
+    renderLoadError(statsBar, loadStats);
+  }
 }
 
 async function loadBySet() {
-  const response = await fetch("/stats/by-set");
-  const sets = await response.json();
   const container = document.getElementById("by-set");
+  container.innerHTML = `
+    <div class="skeleton-row">
+      <div class="skeleton skeleton-text-l"></div>
+      <div class="skeleton skeleton-text-r"></div>
+    </div>
+    <div class="skeleton-row">
+      <div class="skeleton skeleton-text-l"></div>
+      <div class="skeleton skeleton-text-r"></div>
+    </div>
+    <div class="skeleton-row">
+      <div class="skeleton skeleton-text-l"></div>
+      <div class="skeleton skeleton-text-r"></div>
+    </div>
+    <div class="skeleton-row">
+      <div class="skeleton skeleton-text-l"></div>
+      <div class="skeleton skeleton-text-r"></div>
+    </div>
+  `;
+  try {
+  const response = await fetch("/stats/by-set");
+  if (!response.ok) throw new Error("Failed to fetch");
+  const sets = await response.json();
   container.innerHTML = "";
   for (const row of sets) {
     const div = document.createElement("div");
@@ -40,6 +94,9 @@ async function loadBySet() {
       <span class="value">$${row.set_value.toFixed(2)}</span>
     `;
     container.appendChild(div);
+  }  
+  } catch (err) {
+    renderLoadError(container, loadBySet);
   }
 }
 
@@ -66,10 +123,22 @@ function setEmptyStateVisible(visible) {
 }
 
 async function loadCards() {
-  const response = await fetch("/cards");
-  const cards = await response.json();
   const container = document.getElementById("cards-container");
+  // 6 skeleton cards while loading
+  container.innerHTML = Array.from({ length: 6 }).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton skeleton-image"></div>
+      <div class="skeleton skeleton-name"></div>
+      <div class="skeleton skeleton-set"></div>
+      <div class="skeleton skeleton-price"></div>
+    </div>
+  `).join("");
+  try {
+  const response = await fetch("/cards");
+  if (!response.ok) throw new Error("Failed to fetch");
+  const cards = await response.json();
   container.innerHTML = "";
+
   const isEmpty = cards.length === 0;
   setEmptyStateVisible(isEmpty);
   if (isEmpty) return;
@@ -86,6 +155,9 @@ async function loadCards() {
     `;
     container.appendChild(div);
   }
+  } catch (err) {
+    renderLoadError(container, loadCards);
+  }
 }
 
 function refreshAll() {
@@ -97,6 +169,7 @@ function refreshAll() {
 
 async function loadLastUpdated() {
   const response = await fetch("/stats/last-updated");
+  if (!response.ok) throw new Error("Failed to fetch");
   const { last_updated } = await response.json();
   const el = document.getElementById("price-status-date");
   el.textContent = last_updated || "never";
@@ -272,6 +345,7 @@ function setupDropdown(filterKey, options, placeholder) {
 // -------- Search & pagination --------
 
 let currentDetailCardId = null;
+let currentAcquireCard = null;
 
 let searchState = {
   page: 1,
@@ -303,6 +377,7 @@ async function doSearch(resetPage = true) {
     params.append("page_size", searchState.pageSize);
 
     const response = await fetch(`/api/search?${params.toString()}`);
+    if (!response.ok) throw new Error("Failed to fetch");
     const envelope = await response.json();
 
     searchState.totalCount = envelope.totalCount;
@@ -330,7 +405,7 @@ async function doSearch(resetPage = true) {
 
     renderPagination();
   } catch (e) {
-    container.textContent = "Search failed: " + e.message;
+    renderLoadError(container, () => doSearch(false));
   }
 }
 
