@@ -43,11 +43,37 @@ async function loadBySet() {
   }
 }
 
+function setDashboardVisibility(visible) {
+  [
+    "price-status",
+    "stats-bar",
+    "by-set-header",
+    "by-set",
+    "cards-header",
+    "cards-container"
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = visible ? "" : "none";
+  });
+}
+
+function setEmptyStateVisible(visible) {
+  const emptyState = document.getElementById("empty-state");
+  if (emptyState) {
+    emptyState.classList.toggle("visible", visible);
+  }
+  setDashboardVisibility(!visible);
+}
+
 async function loadCards() {
   const response = await fetch("/cards");
   const cards = await response.json();
   const container = document.getElementById("cards-container");
   container.innerHTML = "";
+  const isEmpty = cards.length === 0;
+  setEmptyStateVisible(isEmpty);
+  if (isEmpty) return;
+
   for (const card of cards) {
     const div = document.createElement("div");
     div.className = "card";

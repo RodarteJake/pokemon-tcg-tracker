@@ -826,3 +826,36 @@ h2 {
 .edit-price { width: 90px; }
 .edit-date { width: 140px; }
 .edit-condition { width: 150px; }
+
+/* --- Empty state --- */
+#empty-state {
+  display: none;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 60px 32px;
+  text-align: center;
+  margin-top: 16px;
+}
+
+#empty-state.visible { display: block; }
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.empty-subtitle {
+  font-size: 14px;
+  color: #94a3b8;
+  max-width: 400px;
+  margin: 0 auto;
+}

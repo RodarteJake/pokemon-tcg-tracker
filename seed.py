@@ -36,10 +36,7 @@ sample_cards = [
     # (id, name, set_name, number, rarity, market_price, price_updated_at, image_url) 
     ("base1-4",   "Charizard",  "Base",        "4",    "Rare Holo", 350.00, "2026-04-27", "https://images.pokemontcg.io/base1/4.png"),
     ("base1-2",   "Blastoise",  "Base",        "2",    "Rare Holo", 120.00, "2026-04-27", "https://images.pokemontcg.io/base1/2.png"),
-    ("base1-15",  "Venusaur",   "Base",        "15",   "Rare Holo",  90.00, "2026-04-27", "https://images.pokemontcg.io/base1/15.png"),
     ("base1-58",  "Pikachu",    "Base",        "58",   "Common",      8.00, "2026-04-27", "https://images.pokemontcg.io/base1/58.png"),
-    ("base1-10",  "Mewtwo",     "Base",        "10",   "Rare Holo",  75.00, "2026-04-27", "https://images.pokemontcg.io/base1/10.png"),
-    ("base2-4", "Jolteon",    "Jungle",      "4",    "Rare Holo",  35.00, "2026-04-27", "https://images.pokemontcg.io/base2/4.png"),
     ("base2-51", "Eevee",      "Jungle",      "51",   "Common",      3.00, "2026-04-27", "https://images.pokemontcg.io/base2/51.png"),
     ("base3-2",  "Articuno",   "Fossil",      "2",    "Rare Holo",  45.00, "2026-04-27", "https://images.pokemontcg.io/base3/2.png"),
     ("neo1-9",    "Lugia",      "Neo Genesis", "9",    "Rare Holo", 220.00, "2026-04-27", "https://images.pokemontcg.io/neo1/9.png"),
