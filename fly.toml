@@ -1,0 +1,30 @@
+# fly.toml app configuration file generated for pokemon-tcg-tracker on 2026-05-01T11:51:38-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'pokemon-tcg-tracker'
+primary_region = 'lax'
+
+[build]
+
+[env]
+  PORT = '8080'
+  DB_PATH = '/data/collection.db'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'off'
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpus = 1
+  memory_mb = 1024
+
+[[mounts]]
+  source = 'tcg_data'
+  destination = '/data'

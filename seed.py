@@ -1,46 +1,23 @@
-import sqlite3
+"""Seed the database with sample cards and ownership rows. For local development only."""
 
-conn = sqlite3.connect("collection.db")
+import db
+
+# Make sure tables exist (delegates to db.init_db so production and dev share schema)
+db.init_db()
+
+conn = db.get_connection()
 cursor = conn.cursor()
 
-conn.row_factory = sqlite3.Row
-cursor = conn.cursor()
-
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS cards (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        set_name TEXT,
-        number TEXT,
-        rarity TEXT,
-        market_price REAL,
-        price_updated_at TEXT,
-        image_url TEXT
-    );
-""")
-
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS owned_cards (
-        id INTEGER PRIMARY KEY,
-        card_id TEXT NOT NULL,
-        quantity INTEGER NOT NULL DEFAULT 1,
-        purchase_price REAL,
-        condition TEXT, 
-        acquired_date TEXT,
-        FOREIGN KEY (card_id) REFERENCES cards(id)
-    );
-""")
-
-# Insert sample cards
+# Sample cards
 sample_cards = [
-    # (id, name, set_name, number, rarity, market_price, price_updated_at, image_url) 
-    ("base1-4",   "Charizard",  "Base",        "4",    "Rare Holo", 350.00, "2026-04-27", "https://images.pokemontcg.io/base1/4.png"),
-    ("base1-2",   "Blastoise",  "Base",        "2",    "Rare Holo", 120.00, "2026-04-27", "https://images.pokemontcg.io/base1/2.png"),
-    ("base1-58",  "Pikachu",    "Base",        "58",   "Common",      8.00, "2026-04-27", "https://images.pokemontcg.io/base1/58.png"),
-    ("base2-51", "Eevee",      "Jungle",      "51",   "Common",      3.00, "2026-04-27", "https://images.pokemontcg.io/base2/51.png"),
-    ("base3-2",  "Articuno",   "Fossil",      "2",    "Rare Holo",  45.00, "2026-04-27", "https://images.pokemontcg.io/base3/2.png"),
-    ("neo1-9",    "Lugia",      "Neo Genesis", "9",    "Rare Holo", 220.00, "2026-04-27", "https://images.pokemontcg.io/neo1/9.png"),
-    ("swsh4-25",  "Charizard",  "Vivid Voltage","25",  "Rare",       12.00, "2026-04-27", "https://images.pokemontcg.io/swsh4/25.png"),
+    # (id, name, set_name, number, rarity, market_price, price_updated_at, image_url)
+    ("base1-4",   "Charizard",  "Base",         "4",  "Rare Holo", 350.00, "2026-04-27", "https://images.pokemontcg.io/base1/4.png"),
+    ("base1-2",   "Blastoise",  "Base",         "2",  "Rare Holo", 120.00, "2026-04-27", "https://images.pokemontcg.io/base1/2.png"),
+    ("base1-58",  "Pikachu",    "Base",         "58", "Common",      8.00, "2026-04-27", "https://images.pokemontcg.io/base1/58.png"),
+    ("base2-51",  "Eevee",      "Jungle",       "51", "Common",      3.00, "2026-04-27", "https://images.pokemontcg.io/base2/51.png"),
+    ("base3-2",   "Articuno",   "Fossil",       "2",  "Rare Holo",  45.00, "2026-04-27", "https://images.pokemontcg.io/base3/2.png"),
+    ("neo1-9",    "Lugia",      "Neo Genesis",  "9",  "Rare Holo", 220.00, "2026-04-27", "https://images.pokemontcg.io/neo1/9.png"),
+    ("swsh4-25",  "Charizard",  "Vivid Voltage","25", "Rare",       12.00, "2026-04-27", "https://images.pokemontcg.io/swsh4/25.png"),
 ]
 
 cursor.executemany(
@@ -49,20 +26,20 @@ cursor.executemany(
     (id, name, set_name, number, rarity, market_price, price_updated_at, image_url)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """,
-    sample_cards
+    sample_cards,
 )
 
-# Insert sample ownership records
+# Sample ownership records
 sample_owned = [
     # (card_id, quantity, purchase_price, condition, acquired_date)
-    ("base1-4",    1, 280.00, "Near Mint",        "2024-08-15"),
-    ("base1-4",    1, 150.00, "Lightly Played",   "2025-02-03"),
-    ("base1-2",    2,  95.00, "Near Mint",        "2024-11-20"),
-    ("base1-58",   4,   2.00, "Near Mint",        "2025-01-10"),
-    ("base2-51",  3,   1.50, "Lightly Played",   "2025-03-22"),
-    ("base3-2",   1,  40.00, "Near Mint",        "2025-06-01"),
-    ("neo1-9",     1, 180.00, "Near Mint",        "2024-12-25"),
-    ("swsh4-25",   2,  10.00, "Near Mint",        "2026-01-15"),
+    ("base1-4",   1, 280.00, "Near Mint",      "2024-08-15"),
+    ("base1-4",   1, 150.00, "Lightly Played", "2025-02-03"),
+    ("base1-2",   2,  95.00, "Near Mint",      "2024-11-20"),
+    ("base1-58",  4,   2.00, "Near Mint",      "2025-01-10"),
+    ("base2-51",  3,   1.50, "Lightly Played", "2025-03-22"),
+    ("base3-2",   1,  40.00, "Near Mint",      "2025-06-01"),
+    ("neo1-9",    1, 180.00, "Near Mint",      "2024-12-25"),
+    ("swsh4-25",  2,  10.00, "Near Mint",      "2026-01-15"),
 ]
 
 cursor.executemany(
@@ -71,12 +48,12 @@ cursor.executemany(
     (card_id, quantity, purchase_price, condition, acquired_date)
     VALUES (?, ?, ?, ?, ?)
     """,
-    sample_owned
+    sample_owned,
 )
 
-print(f"Seeded {len(sample_cards)} cards and {len(sample_owned)} ownership records.")
-
 conn.commit()
+
+print(f"Seeded {len(sample_cards)} cards and {len(sample_owned)} ownership records.")
 
 print("\n--- Cards ---")
 for row in cursor.execute("SELECT id, name, set_name, market_price FROM cards"):

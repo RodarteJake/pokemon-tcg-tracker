@@ -6,6 +6,7 @@ import api
 import collection
 from pydantic import BaseModel
 
+db.init_db()
 
 class AcquireRequest(BaseModel):
     card_id: str
