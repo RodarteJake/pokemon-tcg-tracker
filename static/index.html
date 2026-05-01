@@ -15,6 +15,13 @@
     PKMNTCG Tracker
   </h1>
 
+  <div class="auth-bar">
+    <button id="login-button" class="auth-only-loggedout auth-link">Log in to edit</button>
+    <span class="auth-required auth-bar-status">
+      Editing enabled · <button id="logout-button" class="auth-link">Log out</button>
+    </span>
+  </div>
+
   <div class="search-panel">
     <div class="filter-row">
       <div class="filter">
@@ -114,6 +121,23 @@
     </div>
   </div>
 
+  <!-- Login modal -->
+  <div id="login-overlay">
+    <div id="login-panel">
+      <button id="login-close">×</button>
+      <h2 class="login-title">Log in to edit</h2>
+      <p class="login-subtitle">Enter the editor password to add, edit, or delete cards.</p>
+      <form id="login-form">
+        <label>
+          Password
+          <input type="password" id="login-password" autocomplete="current-password" required>
+        </label>
+        <div id="login-error" class="login-error"></div>
+        <button type="submit" id="login-submit">Log in</button>
+      </form>
+    </div>
+  </div>
+
   <!-- Card detail modal -->
   <div id="detail-overlay">
     <div id="detail-panel">
@@ -128,7 +152,7 @@
     <span class="price-status-label">
       Prices last updated: <span id="price-status-date">…</span>
     </span>
-    <button id="refresh-prices-button">Refresh prices</button>
+    <button id="refresh-prices-button" class="auth-required">Refresh prices</button>
   </div>
 
   <div class="stats-bar" id="stats-bar">Loading stats...</div>

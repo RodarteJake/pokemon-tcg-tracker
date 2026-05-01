@@ -1,3 +1,43 @@
+// -------- Auth --------
+
+function setAuthed(authed) {
+  document.body.classList.toggle("authed", authed);
+}
+
+async function initAuth() {
+  try {
+    const response = await fetch("/auth/status");
+    if (!response.ok) throw new Error("status fetch failed");
+    const { authed } = await response.json();
+    setAuthed(authed);
+  } catch {
+    setAuthed(false);
+  }
+}
+
+function openLogin() {
+  document.getElementById("login-error").textContent = "";
+  document.getElementById("login-password").value = "";
+  document.getElementById("login-overlay").classList.add("open");
+  setTimeout(() => document.getElementById("login-password").focus(), 0);
+}
+
+function closeLogin() {
+  document.getElementById("login-overlay").classList.remove("open");
+}
+
+async function apiFetch(url, options = {}) {
+  const response = await fetch(url, options);
+  if (response.status === 401) {
+    setAuthed(false);
+    openLogin();
+    const err = new Error("Login required");
+    err.status = 401;
+    throw err;
+  }
+  return response;
+}
+
 // -------- Data loaders --------
 
 function renderLoadError(container, retryFn) {
@@ -181,7 +221,7 @@ async function refreshPrices() {
   button.textContent = "Refreshing…";
 
   try {
-    const response = await fetch("/collection/refresh-prices", { method: "POST" });
+    const response = await apiFetch("/collection/refresh-prices", { method: "POST" });
     if (!response.ok) throw new Error("Server error");
     // Reload everything that depends on prices
     refreshAll();
@@ -397,7 +437,7 @@ async function doSearch(resetPage = true) {
         <img src="${card.images.small}" alt="${card.name}">
         <div class="card-name">${card.name}</div>
         <div class="card-set">${card.set.name} · #${card.number}</div>
-        <button class="add-button">Add to Collection</button>
+        <button class="add-button auth-required">Add to Collection</button>
       `;
       container.appendChild(div);
       div.querySelector(".add-button").addEventListener("click", () => openModal(card));
@@ -523,7 +563,7 @@ async function openDetail(cardId) {
           <div class="meta">Acquired ${row.acquired_date || "unknown date"}</div>
         </div>
         <div class="price">${row.purchase_price !== null ? `$${row.purchase_price.toFixed(2)}` : "—"}</div>
-        <div class="actions">
+        <div class="actions auth-required">
           <button class="icon-btn" data-owned-id="${row.id}" data-action="edit">Edit</button>
           <button class="icon-btn danger" data-owned-id="${row.id}" data-action="delete">Delete</button>
         </div>
@@ -560,7 +600,7 @@ function closeDetail() {
 
 async function deleteOwnedRow(ownedId) {
   try {
-    const response = await fetch(`/collection/owned/${ownedId}`, {
+    const response = await apiFetch(`/collection/owned/${ownedId}`, {
       method: "DELETE",
     });
 
@@ -606,7 +646,7 @@ async function saveOwnedEdit(row, ownedId) {
       acquired_date,
     };
 
-    const response = await fetch(`/collection/owned/${ownedId}`, {
+    const response = await apiFetch(`/collection/owned/${ownedId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -652,12 +692,63 @@ document.getElementById("detail-overlay").addEventListener("click", (e) => {
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    if (document.getElementById("detail-overlay").classList.contains("open")) {
+    if (document.getElementById("login-overlay").classList.contains("open")) {
+      closeLogin();
+    } else if (document.getElementById("detail-overlay").classList.contains("open")) {
       closeDetail();
     } else {
       closeModal();
     }
   }
+});
+
+document.getElementById("login-button").addEventListener("click", openLogin);
+document.getElementById("login-close").addEventListener("click", closeLogin);
+
+document.getElementById("login-overlay").addEventListener("click", (e) => {
+  if (e.target.id === "login-overlay") closeLogin();
+});
+
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById("login-submit");
+  const errorEl = document.getElementById("login-error");
+  const password = document.getElementById("login-password").value;
+
+  errorEl.textContent = "";
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Logging in…";
+
+  try {
+    const response = await fetch("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    if (response.status === 401) {
+      errorEl.textContent = "Wrong password.";
+      return;
+    }
+    if (response.status === 503) {
+      errorEl.textContent = "Editing is not configured on this server.";
+      return;
+    }
+    if (!response.ok) throw new Error("Server error");
+    setAuthed(true);
+    closeLogin();
+  } catch (err) {
+    errorEl.textContent = "Couldn't log in. Try again.";
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Log in";
+  }
+});
+
+document.getElementById("logout-button").addEventListener("click", async () => {
+  try {
+    await fetch("/auth/logout", { method: "POST" });
+  } catch {}
+  setAuthed(false);
 });
 
 document.getElementById("acquire-form").addEventListener("submit", async (e) => {
@@ -677,7 +768,7 @@ document.getElementById("acquire-form").addEventListener("submit", async (e) => 
   };
 
   try {
-    const response = await fetch("/collection/acquire", {
+    const response = await apiFetch("/collection/acquire", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -734,5 +825,6 @@ document.getElementById("detail-ownership-list").addEventListener("click", (e) =
 
 // -------- Initial load --------
 
+initAuth();
 refreshAll();
 initDropdowns();

@@ -1,12 +1,20 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-import db
-import api 
-import collection
+from starlette.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel
+import os
+import secrets
+import db
+import api
+import collection
 
 db.init_db()
+
+EDIT_PASSWORD = os.environ.get("EDIT_PASSWORD", "")
+SESSION_SECRET = os.environ.get("SESSION_SECRET") or secrets.token_hex(32)
+COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
+
 
 class AcquireRequest(BaseModel):
     card_id: str
@@ -15,7 +23,46 @@ class AcquireRequest(BaseModel):
     condition: str | None = None
     acquired_date: str | None = None
 
+
+class LoginRequest(BaseModel):
+    password: str
+
+
 app = FastAPI()
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET,
+    same_site="lax",
+    https_only=COOKIE_SECURE,
+    max_age=60 * 60 * 24 * 30,
+)
+
+
+def require_auth(request: Request):
+    if not request.session.get("authed"):
+        raise HTTPException(status_code=401, detail="Login required")
+
+
+@app.post("/auth/login")
+def login(body: LoginRequest, request: Request):
+    if not EDIT_PASSWORD:
+        raise HTTPException(status_code=503, detail="Editing not configured")
+    if not secrets.compare_digest(body.password, EDIT_PASSWORD):
+        raise HTTPException(status_code=401, detail="Wrong password")
+    request.session["authed"] = True
+    return {"status": "ok"}
+
+
+@app.post("/auth/logout")
+def logout(request: Request):
+    request.session.clear()
+    return {"status": "ok"}
+
+
+@app.get("/auth/status")
+def auth_status(request: Request):
+    return {"authed": bool(request.session.get("authed"))}
 
 
 @app.get("/")
@@ -87,13 +134,13 @@ def search(
         page_size=page_size,
     )
 
-@app.post("/collection/refresh-prices")
+@app.post("/collection/refresh-prices", dependencies=[Depends(require_auth)])
 def refresh_prices():
     """Refresh market prices for every card in the collection."""
     collection.refresh_all_prices()
     return {"status": "ok"}
 
-@app.post("/collection/acquire")
+@app.post("/collection/acquire", dependencies=[Depends(require_auth)])
 def acquire(request: AcquireRequest):
     """Acquire a card: fetch from API, save metadata, record ownership."""
     collection.acquire_card(
@@ -112,7 +159,7 @@ class UpdateOwnedRequest(BaseModel):
     acquired_date: str | None = None
 
 
-@app.patch("/collection/owned/{owned_id}")
+@app.patch("/collection/owned/{owned_id}", dependencies=[Depends(require_auth)])
 def update_owned(owned_id: int, body: UpdateOwnedRequest):
     """Update an existing ownership row."""
     db.update_owned_card(
@@ -125,7 +172,7 @@ def update_owned(owned_id: int, body: UpdateOwnedRequest):
     return {"status": "ok"}
 
 
-@app.delete("/collection/owned/{owned_id}")
+@app.delete("/collection/owned/{owned_id}", dependencies=[Depends(require_auth)])
 def delete_owned(owned_id: int):
     """Delete an ownership row. Cascades: if it was the last row for that card, also delete the card."""
     card_id = db.delete_owned_card(owned_id)

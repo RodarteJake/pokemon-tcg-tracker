@@ -11,6 +11,7 @@ primary_region = 'lax'
 [env]
   PORT = '8080'
   DB_PATH = '/data/collection.db'
+  COOKIE_SECURE = 'true'
 
 [http_service]
   internal_port = 8080

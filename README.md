@@ -63,6 +63,27 @@ uvicorn web:app --reload
 
 Then open http://127.0.0.1:8000 in your browser.
 
+## Auth
+
+Visitors get read-only access. To add, edit, delete, or refresh prices, you log in with a single shared password.
+
+Required env vars:
+
+- `EDIT_PASSWORD` — the password the editor types in. If unset, login is disabled and the site is read-only.
+- `SESSION_SECRET` — used to sign the session cookie. If unset, a random one is generated at startup (sessions expire on restart, fine for dev).
+- `COOKIE_SECURE` — set to `true` in production (HTTPS-only cookie). Defaults to `false` for local dev.
+
+For local dev, `EDIT_PASSWORD=hunter2 uvicorn web:app --reload` is enough.
+
+For Fly:
+
+```bash
+flyctl secrets set EDIT_PASSWORD='<long random password>'
+flyctl secrets set SESSION_SECRET="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+```
+
+`COOKIE_SECURE=true` is already set in `fly.toml`.
+
 ## Data sources
 
 Card data and pricing courtesy of the [Pokémon TCG API](https://docs.pokemontcg.io/), with prices from TCGPlayer.
