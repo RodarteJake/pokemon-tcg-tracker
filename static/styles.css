@@ -972,3 +972,83 @@ h2 {
 .load-error-retry:hover {
   border-color: #38bdf8;
 }
+
+.title-icon {
+  height: 36px;
+  width: 36px;
+  vertical-align: middle;
+  margin-right: 8px;
+  margin-bottom: 4px;
+}
+
+/* --- Mobile responsiveness --- */
+@media (max-width: 600px) {
+  body {
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  /* Detail modal: stack image above info on narrow screens */
+  #detail-card-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  #detail-card-info img {
+    width: 60%;
+    max-width: 200px;
+  }
+
+  /* Ownership rows: stack columns instead of fighting for horizontal space */
+  .ownership-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .ownership-row .price {
+    text-align: left;
+  }
+
+  .ownership-row .actions {
+    justify-content: flex-end;
+  }
+
+  /* Inline edit form: stack inputs vertically on phones */
+  .ownership-row .edit-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .edit-form input,
+  .edit-form select {
+    width: 100% !important;  /* override the fixed widths from desktop styles */
+  }
+
+  /* Cap the cards grid card width so a single card doesn't stretch full-width */
+  #cards-container {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 200px));
+    justify-content: start;
+  }
+
+  /* Confirm-delete: also stack to give the buttons room */
+  .ownership-row .confirm-delete {
+    flex-wrap: wrap;
+  }
+
+  /* Error UI: don't squash the Retry button */
+  .load-error {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .load-error-retry {
+    width: 100%;
+  }
+}

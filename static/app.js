@@ -45,11 +45,11 @@ async function loadStats() {
     statsBar.innerHTML = `
       <div class="stat-card">
         <div class="stat-label">Total Value</div>
-        <div class="stat-value positive">$${total_value.toFixed(2)}</div>
+        <div class="stat-value positive">$${total_value !== null ? total_value.toFixed(2) : "—"}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Total Spent</div>
-        <div class="stat-value">$${total_spent.toFixed(2)}</div>
+        <div class="stat-value">$${total_spent !== null ? total_spent.toFixed(2) : "—"}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Gain / Loss</div>
@@ -91,7 +91,7 @@ async function loadBySet() {
     div.className = "by-set-row";
     div.innerHTML = `
       <span class="set-name">${row.set_name}</span>
-      <span class="value">$${row.set_value.toFixed(2)}</span>
+      <span class="value">$${(row.set_value ?? 0).toFixed(2)}</span>
     `;
     container.appendChild(div);
   }  
@@ -151,7 +151,7 @@ async function loadCards() {
       <img src="${card.image_url}" alt="${card.name}">
       <div class="card-name">${card.name}</div>
       <div class="card-set">${card.set_name}</div>
-      <div class="card-price">$${card.market_price.toFixed(2)}</div>
+      <div class="card-price">$${(card.market_price ?? 0).toFixed(2)}</div>
     `;
     container.appendChild(div);
   }
@@ -500,7 +500,7 @@ async function openDetail(cardId) {
       <div class="name">${card.name}</div>
       <div class="set">${card.set_name} · #${card.number}</div>
       <div class="market-label">Current Market Value</div>
-      <div class="market-value">$${card.market_price.toFixed(2)}</div>
+      <div class="market-value">$${(card.market_price ?? 0).toFixed(2)}</div>
       </div>
   `;
 
