@@ -1,5 +1,7 @@
 # Pokémon TCG Collection Tracker
 
+[Live Demo](https://pokemon-tcg-tracker.fly.dev/)
+
 A personal Pokémon Trading Card Game collection tracker with live pricing, statistics, and a search-driven acquisition flow. Built as a full-stack project to learn SQL, REST APIs, and modern web fundamentals.
 
 ## Features
@@ -7,16 +9,25 @@ A personal Pokémon Trading Card Game collection tracker with live pricing, stat
 - **Live pricing** — fetches current market values from the Pokémon TCG API
 - **Collection dashboard** — total value, total spent, gain/loss, and value-by-set breakdown
 - **Search & acquire** — search the entire Pokémon TCG catalog with paginated results, click to add cards to your collection
+- **Auth** — visitors get read-only access; log in with a password to add, edit, delete, or refresh prices
 - **Local-first storage** — SQLite database, no cloud dependencies
 - **Resilient price refresh** — batch refresh handles individual API failures without aborting
 
 ## Screenshots
 
-![dashboard](dashboard.png)
+**Collection dashboard**
+<img width="1917" height="890" alt="Collection dashboard showing total value, gain/loss, and set breakdown" src="https://github.com/user-attachments/assets/e965ce2f-15bc-40af-9011-d37617ce408a" />
 
-![search](search.png)
+**Search**
+<img width="1915" height="919" alt="Search results page" src="https://github.com/user-attachments/assets/ce28b097-7b26-46f2-85ea-b169d8516c66" />
 
-## Tech stack
+**Add to collection**
+<img width="429" height="563" alt="Add to collection modal" src="https://github.com/user-attachments/assets/4df39816-b7c9-4320-9bc6-380719e1046d" />
+
+**Card detail**
+<img width="565" height="396" alt="Owned card detail view" src="https://github.com/user-attachments/assets/dbb5dfdf-808d-4c00-bf05-7d9243b7a89a" />
+
+## How it's built
 
 **Backend**
 - Python 3.11
@@ -65,7 +76,7 @@ Then open http://127.0.0.1:8000 in your browser.
 
 ## Auth
 
-Visitors get read-only access. To add, edit, delete, or refresh prices, you log in with a single shared password.
+Visitors get read-only access. To add, edit, delete, or refresh prices, log in with a single shared password.
 
 Required env vars:
 
