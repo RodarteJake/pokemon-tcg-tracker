@@ -188,7 +188,7 @@ async function loadCards() {
     div.className = "card";
     div.dataset.cardId = card.id;
     div.innerHTML = `
-      <img src="${card.image_url}" alt="${card.name}" width="240" height="330" loading="lazy" decoding="async">
+      <img src="${card.image_url}" alt="" width="240" height="330" loading="lazy" decoding="async">
       <div class="card-name">${card.name}</div>
       <div class="card-set">${card.set_name}</div>
       <div class="card-price">$${(card.market_price ?? 0).toFixed(2)}</div>
@@ -434,7 +434,7 @@ async function doSearch(resetPage = true) {
       const div = document.createElement("div");
       div.className = "search-result";
       div.innerHTML = `
-        <img src="${card.images.small}" alt="${card.name}" width="240" height="330" loading="lazy" decoding="async">
+        <img src="${card.images.small}" alt="" width="240" height="330" loading="lazy" decoding="async">
         <div class="card-name">${card.name}</div>
         <div class="card-set">${card.set.name} · #${card.number}</div>
         <button class="add-button auth-required">Add to Collection</button>
@@ -512,7 +512,7 @@ function renderPagination() {
 function openModal(card) {
   currentAcquireCard = card;
   document.getElementById("modal-card-preview").innerHTML = `
-    <img src="${card.images.small}" alt="${card.name}" width="240" height="330" loading="lazy" decoding="async">
+    <img src="${card.images.small}" alt="" width="240" height="330" loading="lazy" decoding="async">
     <div>
       <div class="preview-name">${card.name}</div>
       <div class="preview-set">${card.set.name} · #${card.number}</div>
@@ -535,7 +535,7 @@ async function openDetail(cardId) {
     fetch(`/cards/${cardId}/ownership`).then(r => r.json())
   ]);
   document.getElementById("detail-card-info").innerHTML = `
-    <img src="${card.image_url}" alt="${card.name}" width="240" height="330" loading="lazy" decoding="async">
+    <img src="${card.image_url}" alt="" width="240" height="330" loading="lazy" decoding="async">
     <div class="info">
       <div class="name">${card.name}</div>
       <div class="set">${card.set_name} · #${card.number}</div>

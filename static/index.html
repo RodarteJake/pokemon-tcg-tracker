@@ -24,27 +24,27 @@
   </div>
 
   <main>
-    <div class="search-panel">
+<div class="search-panel">
       <div class="filter-row">
         <div class="filter">
-          <label>Name</label>
+          <label for="filter-name">Name</label>
           <input type="text" id="filter-name" placeholder="e.g. Arcanine">
         </div>
         <div class="filter">
-          <label>Set</label>
-          <div class="searchable-dropdown" data-filter="set"></div>
+          <label id="label-set">Set</label>
+          <div class="searchable-dropdown" data-filter="set" role="combobox" aria-labelledby="label-set"></div>
         </div>
         <div class="filter">
-          <label>Rarity</label>
-          <div class="searchable-dropdown" data-filter="rarity"></div>
+          <label id="label-rarity">Rarity</label>
+          <div class="searchable-dropdown" data-filter="rarity" role="combobox" aria-labelledby="label-rarity"></div>
         </div>
         <div class="filter">
-          <label>Type</label>
-          <div class="searchable-dropdown" data-filter="type"></div>
+          <label id="label-type">Type</label>
+          <div class="searchable-dropdown" data-filter="type" role="combobox" aria-labelledby="label-type"></div>
         </div>
         <div class="filter">
-          <label>Supertype</label>
-          <div class="searchable-dropdown" data-filter="supertype"></div>
+          <label id="label-supertype">Supertype</label>
+          <div class="searchable-dropdown" data-filter="supertype" role="combobox" aria-labelledby="label-supertype"></div>
         </div>
       </div>
 
@@ -54,23 +54,23 @@
 
       <div class="filter-row advanced-filters" id="advanced-filters">
         <div class="filter">
-          <label>Subtype</label>
-          <div class="searchable-dropdown" data-filter="subtype"></div>
+          <label id="label-subtype">Subtype</label>
+          <div class="searchable-dropdown" data-filter="subtype" role="combobox" aria-labelledby="label-subtype"></div>
         </div>
         <div class="filter">
-          <label>Series</label>
+          <label for="filter-series">Series</label>
           <input type="text" id="filter-series" placeholder="e.g. Sword & Shield">
         </div>
         <div class="filter">
-          <label>Artist</label>
+          <label for="filter-artist">Artist</label>
           <input type="text" id="filter-artist" placeholder="e.g. Mitsuhiro Arita">
         </div>
         <div class="filter filter-narrow">
-          <label>HP min</label>
+          <label for="filter-hp-min">HP min</label>
           <input type="number" id="filter-hp-min" min="0" placeholder="0">
         </div>
         <div class="filter filter-narrow">
-          <label>HP max</label>
+          <label for="filter-hp-max">HP max</label>
           <input type="number" id="filter-hp-max" min="0" placeholder="500">
         </div>
       </div>
@@ -167,7 +167,7 @@
     <div id="detail-panel">
       <button id="detail-close">×</button>
       <div id="detail-card-info"></div>
-      <h3 id="detail-ownership-header"></h3>
+      <h3 id="detail-ownership-header">Your copies</h3>
       <div id="detail-ownership-list"></div>
     </div>
   </div>
