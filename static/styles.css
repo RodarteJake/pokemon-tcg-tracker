@@ -116,6 +116,7 @@ h2 {
 
 .card img {
   width: 100%;
+  height: auto;
   border-radius: 4px;
   display: block;
 }
@@ -692,6 +693,14 @@ h2 {
   letter-spacing: 0.08em;
   font-weight: 600;
   margin-bottom: 4px;
+}
+
+#detail-card-info img,
+#modal-card-preview img {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  display: block;
 }
 
 /* Ownership rows list */
