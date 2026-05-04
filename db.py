@@ -93,7 +93,9 @@ def add_card(card_id, name, set_name, number, rarity, market_price, price_update
     conn.close()
 
 def add_owned_card(card_id, quantity, purchase_price, condition, acquired_date):
-    """Add a new owned card record. Silently ignores if card_id doesn't exist in cards table."""
+    """Insert a new ownership row for an existing card. 
+    
+    Raises sqlite3.IntegrityError if card_id does not exist in the cards table"""
     conn = get_connection()
     cursor = conn.cursor()  
     cursor.execute(
