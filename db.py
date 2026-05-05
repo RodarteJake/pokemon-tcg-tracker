@@ -97,9 +97,8 @@ def get_last_price_update():
     conn.close()
     return row["last_updated"]
 
-def add_card(card_id, name, set_name, number, rarity, market_price, price_updated_at, image_url):
-    """Add a new card to the cards table. Silently ignores duplicates."""
-    conn = get_connection()
+def add_card(conn, card_id, name, set_name, number, rarity, market_price, price_updated_at, image_url):
+    """Add a new card to the cards table. Silently ignores duplicates. Caller is responsible for committing the transaction."""
     cursor = conn.cursor()
     cursor.execute(
         """
@@ -109,14 +108,14 @@ def add_card(card_id, name, set_name, number, rarity, market_price, price_update
         """,
         (card_id, name, set_name, number, rarity, market_price, price_updated_at, image_url)
     )
-    conn.commit()
-    conn.close()
 
-def add_owned_card(card_id, quantity, purchase_price, condition, acquired_date):
-    """Insert a new ownership row for an existing card. 
+def add_owned_card(conn, card_id, quantity, purchase_price, condition, acquired_date):
+    """Insert a new ownership row for an existing card. Caller is responsible for committing the transaction.
     
-    Raises sqlite3.IntegrityError if card_id does not exist in the cards table"""
-    conn = get_connection()
+    Raises:
+    sqlite3.IntegrityError: 
+        if card_id does not exist in the cards table,
+        or if quantity is not positive (CHECK constraint)."""
     cursor = conn.cursor()  
     cursor.execute(
         """
@@ -126,8 +125,6 @@ def add_owned_card(card_id, quantity, purchase_price, condition, acquired_date):
         """,
         (card_id, quantity, purchase_price, condition, acquired_date)
     )
-    conn.commit()
-    conn.close()
 
 def get_total_collection_value():
     """Return the total current market value of the entire collection."""
