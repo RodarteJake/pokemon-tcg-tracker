@@ -10,6 +10,7 @@ import api
 import collection
 
 db.init_db()
+db.run_migrations()
 
 EDIT_PASSWORD = os.environ.get("EDIT_PASSWORD", "")
 SESSION_SECRET = os.environ.get("SESSION_SECRET") or secrets.token_hex(32)

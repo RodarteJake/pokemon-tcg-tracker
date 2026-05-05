@@ -27,7 +27,8 @@ def init_db():
             purchase_price REAL,
             condition TEXT,
             acquired_date TEXT,
-            FOREIGN KEY (card_id) REFERENCES cards(id)
+            FOREIGN KEY (card_id) REFERENCES cards(id),
+            CHECK (quantity > 0)
         );
     """)
     conn.commit()
@@ -40,6 +41,25 @@ def get_connection():
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
+def run_migrations():
+    """Run all migration scripts in the migrations/ directory and record which ones have been applied."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)")
+    cursor.execute("SELECT name FROM schema_migrations")
+    applied = set(row["name"] for row in cursor.fetchall())
+    migration_files = sorted(f for f in os.listdir("migrations") if f.endswith(".sql"))
+    # the migration files run BEGIN TRANSACTION and COMMIT themselves, so we don't wrap this loop in a transaction
+    for filename in migration_files:
+        if filename in applied:
+            continue
+        with open(os.path.join("migrations", filename), "r") as f:
+            sql = f.read()
+            print(f"Applying migration: {filename}")
+            cursor.executescript(sql)
+        cursor.execute("INSERT INTO schema_migrations (name) VALUES (?)", (filename,))
+    conn.commit()
+    conn.close()   
 
 def get_all_cards():
     """Return every card in the cards table."""
