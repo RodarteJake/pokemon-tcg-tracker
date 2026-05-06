@@ -98,13 +98,16 @@ def get_last_price_update():
     return row["last_updated"]
 
 def add_card(conn, card_id, name, set_name, number, rarity, market_price, price_updated_at, image_url):
-    """Add a new card to the cards table. Silently ignores duplicates. Caller is responsible for committing the transaction."""
+    """Insert a new card or update an existing one's price. Caller is responsible for committing the transaction."""
     cursor = conn.cursor()
     cursor.execute(
         """
-        INSERT OR IGNORE INTO cards
+        INSERT INTO cards
         (id, name, set_name, number, rarity, market_price, price_updated_at, image_url)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT (id) DO UPDATE SET
+            market_price = excluded.market_price,
+            price_updated_at = excluded.price_updated_at
         """,
         (card_id, name, set_name, number, rarity, market_price, price_updated_at, image_url)
     )
