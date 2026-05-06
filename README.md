@@ -2,7 +2,9 @@
 
 [Live Demo](https://pokemon-tcg-tracker.fly.dev/)
 
-A personal Pokémon Trading Card Game collection tracker with live pricing, statistics, and a search-driven acquisition flow. Built as a full-stack project to learn SQL, REST APIs, and modern web fundamentals.
+A personal Pokémon Trading Card Game collection tracker with live pricing, statistics, and a search-driven acquisition flow. Built as a full-stack project to learn SQL, REST APIs, and modern web fundamentals. 
+
+Used Claude as a pair-programmer and tutor. I made the architecture and implementation decisions; Claude helped me reason through tradeoffs, catch bugs, and turn my notes into clear issues and documentation.
 
 ## Features
 
