@@ -249,3 +249,44 @@ def delete_card(card_id):
     cursor.execute("DELETE FROM cards WHERE id = ?", (card_id,))
     conn.commit()
     conn.close()
+
+def get_user_by_id(user_id: int) -> sqlite3.Row | None:
+    """Look up a user by ID. Returns the row or None if not found."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT user_id, username, email, created_at FROM users WHERE user_id = ?",
+        (user_id,),
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return row
+
+def get_user_for_login(identifier: str) -> sqlite3.Row | None:
+    """Look up a user by username or email for login purposes. Returns the row (including hashed_password) or None if not found."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT user_id, username, email, hashed_password FROM users WHERE username = ? OR email = ?",
+        (identifier, identifier),  
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return row
+
+def create_user(username: str, email: str, hashed_password: str) -> int:
+    """Create a new user and return their user_id.
+
+    Raises:
+        sqlite3.IntegrityError: if username or email is already taken.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO users (username, email, hashed_password) VALUES (?, ?, ?)",
+        (username, email, hashed_password),
+    )
+    user_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return user_id

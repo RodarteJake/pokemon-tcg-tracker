@@ -6,6 +6,8 @@ certifi==2026.4.22
 charset-normalizer==3.4.7
 click==8.3.3
 colorama==0.4.6
+dnspython==2.8.0
+email-validator==2.3.0
 fastapi==0.136.1
 h11==0.16.0
 idna==3.13

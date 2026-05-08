@@ -1,14 +1,18 @@
-from fastapi import FastAPI, HTTPException, Depends, Request
+import os
+import secrets
+import sqlite3
+
+from fastapi import FastAPI, HTTPException, Depends, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from starlette.middleware.sessions import SessionMiddleware
-from pydantic import BaseModel
-import os
-import secrets
+from pydantic import BaseModel, EmailStr, Field
+from dotenv import load_dotenv
+
+import auth
 import db
 import api
 import collection
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -29,8 +33,13 @@ class AcquireRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
+    identifier: str  # username or email
     password: str
 
+class RegisterRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=30, pattern=r"^[a-zA-Z0-9_]+$")
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
 
 app = FastAPI()
 
@@ -42,31 +51,30 @@ app.add_middleware(
     max_age=60 * 60 * 24 * 30,
 )
 
-
 def require_auth(request: Request):
     if not request.session.get("authed"):
         raise HTTPException(status_code=401, detail="Login required")
 
-
-@app.post("/auth/login")
-def login(body: LoginRequest, request: Request):
-    if not EDIT_PASSWORD:
-        raise HTTPException(status_code=503, detail="Editing not configured")
-    if not secrets.compare_digest(body.password, EDIT_PASSWORD):
-        raise HTTPException(status_code=401, detail="Wrong password")
-    request.session["authed"] = True
-    return {"status": "ok"}
-
-
 @app.post("/auth/logout")
-def logout(request: Request):
-    request.session.clear()
+def logout(response: Response):
+    """Log out by clearing the auth cookie."""
+    response.delete_cookie(
+        key="access_token",
+        samesite="lax",
+        secure=COOKIE_SECURE,
+    )
     return {"status": "ok"}
 
 
 @app.get("/auth/status")
-def auth_status(request: Request):
-    return {"authed": bool(request.session.get("authed"))}
+def auth_status(user_id: int | None = Depends(auth.get_optional_user)):
+    """Return current user info if authenticated, or null."""
+    if user_id is None:
+        return {"user": None}
+    user = db.get_user_by_id(user_id)
+    if user is None:
+        return {"user": None}  
+    return {"user": {"user_id": user["user_id"], "username": user["username"], "email": user["email"]}}
 
 
 @app.get("/")
@@ -138,14 +146,14 @@ def search(
         page_size=page_size,
     )
 
-@app.post("/collection/refresh-prices", dependencies=[Depends(require_auth)])
-def refresh_prices():
+@app.post("/collection/refresh-prices")
+def refresh_prices(user_id: int = Depends(auth.get_current_user)):
     """Refresh market prices for every card in the collection."""
     collection.refresh_all_prices()
     return {"status": "ok"}
 
-@app.post("/collection/acquire", dependencies=[Depends(require_auth)])
-def acquire(request: AcquireRequest):
+@app.post("/collection/acquire")
+def acquire(request: AcquireRequest, user_id: int = Depends(auth.get_current_user)):
     """Acquire a card: fetch from API, save metadata, record ownership."""
     collection.acquire_card(
         card_id=request.card_id,
@@ -162,9 +170,8 @@ class UpdateOwnedRequest(BaseModel):
     condition: str
     acquired_date: str | None = None
 
-
-@app.patch("/collection/owned/{owned_id}", dependencies=[Depends(require_auth)])
-def update_owned(owned_id: int, body: UpdateOwnedRequest):
+@app.patch("/collection/owned/{owned_id}")
+def update_owned(owned_id: int, body: UpdateOwnedRequest, user_id: int = Depends(auth.get_current_user)):
     """Update an existing ownership row."""
     db.update_owned_card(
         owned_id=owned_id,
@@ -175,9 +182,8 @@ def update_owned(owned_id: int, body: UpdateOwnedRequest):
     )
     return {"status": "ok"}
 
-
-@app.delete("/collection/owned/{owned_id}", dependencies=[Depends(require_auth)])
-def delete_owned(owned_id: int):
+@app.delete("/collection/owned/{owned_id}")
+def delete_owned(owned_id: int, user_id: int = Depends(auth.get_current_user)):
     """Delete an ownership row. Cascades: if it was the last row for that card, also delete the card."""
     card_id = db.delete_owned_card(owned_id)
     if card_id is None:
@@ -216,6 +222,51 @@ def filter_rarities():
 @app.get("/stats/last-updated")
 def last_updated():
     return {"last_updated": db.get_last_price_update()}
+
+def set_auth_cookie(response: Response, user_id: int) -> None:
+    """Issue a JWT access token and set it as an HttpOnly cookie."""
+    token = auth.create_access_token(user_id)
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite="lax",
+        max_age=auth.JWT_EXPIRY_MINUTES * 60,
+    )
+
+@app.post("/auth/register")
+def register(body: RegisterRequest, response: Response):
+    """Register a new user with username, email, and password. Returns user info and sets auth cookie."""
+    username = body.username.strip()
+    email = body.email.strip().lower()
+    hashed_password = auth.hash_password(body.password)
+
+    try:
+        user_id = db.create_user(
+            username=username,
+            email=email,
+            hashed_password=hashed_password,
+        )
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=409, detail="Username or email already exists")
+
+    set_auth_cookie(response, user_id)
+
+    return {"user_id": user_id, "username": username, "email": email}
+
+@app.post("/auth/login")
+def login(body: LoginRequest, response: Response):
+    """Authenticate a user with username/email and password. Returns user info and sets auth cookie."""
+    identifier = body.identifier.strip()
+
+    user = db.get_user_for_login(identifier)
+    if user is None or not auth.verify_password(body.password, user["hashed_password"]):
+        raise HTTPException(status_code=401, detail="Invalid username/email or password")
+
+    set_auth_cookie(response, user["user_id"])
+
+    return {"user_id": user["user_id"], "username": user["username"], "email": user["email"]}
 
 # Serve all files in /static at the /static URL path
 app.mount("/static", StaticFiles(directory="static"), name="static")
