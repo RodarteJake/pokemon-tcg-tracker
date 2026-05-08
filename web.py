@@ -8,6 +8,9 @@ import secrets
 import db
 import api
 import collection
+from dotenv import load_dotenv
+
+load_dotenv()
 
 db.init_db()
 db.run_migrations()
