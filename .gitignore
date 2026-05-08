@@ -13,6 +13,8 @@ __pycache__/
 *.sqlite
 *.sqlite3
 
+NOTES.md
+
 # VS Code
 .vscode/
 
