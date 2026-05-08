@@ -1,8 +1,10 @@
 import bcrypt
+from fastapi import HTTPException, Cookie
 import jwt
 import os
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
+import db
 
 load_dotenv()
 JWT_SECRET = os.getenv("JWT_SECRET")
@@ -36,3 +38,33 @@ def decode_access_token(token: str) -> int | None:
         return int(payload["sub"])
     except jwt.InvalidTokenError:
         return None
+    
+def get_current_user(access_token: str | None = Cookie(default=None)) -> int:
+    """FastAPI dependency: returns the authenticated user_id, or raises 401."""
+    if access_token is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    user_id = decode_access_token(access_token)
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    
+    # Verify the user still exists (they could have been deleted while token is valid)
+    if db.get_user_by_id(user_id) is None:
+        raise HTTPException(status_code=401, detail="User not found")
+    
+    return user_id
+
+def get_optional_user(access_token: str | None = Cookie(default=None)) -> int | None:
+    """FastAPI dependency: returns the authenticated user_id, or None if not authenticated."""
+    if access_token is None:
+        return None
+    
+    user_id = decode_access_token(access_token)
+    if user_id is None:
+        return None
+    
+    # Verify the user still exists (they could have been deleted while token is valid)
+    if db.get_user_by_id(user_id) is None:
+        return None
+    
+    return user_id
