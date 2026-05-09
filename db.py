@@ -112,7 +112,7 @@ def add_card(conn, card_id, name, set_name, number, rarity, market_price, price_
         (card_id, name, set_name, number, rarity, market_price, price_updated_at, image_url)
     )
 
-def add_owned_card(conn, card_id, quantity, purchase_price, condition, acquired_date):
+def add_owned_card(conn, card_id, quantity, purchase_price, condition, acquired_date, user_id):
     """Insert a new ownership row for an existing card. Caller is responsible for committing the transaction.
     
     Raises:
@@ -123,10 +123,10 @@ def add_owned_card(conn, card_id, quantity, purchase_price, condition, acquired_
     cursor.execute(
         """
         INSERT INTO owned_cards
-        (card_id, quantity, purchase_price, condition, acquired_date)
-        VALUES (?, ?, ?, ?, ?)
+        (card_id, quantity, purchase_price, condition, acquired_date, user_id)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (card_id, quantity, purchase_price, condition, acquired_date)
+        (card_id, quantity, purchase_price, condition, acquired_date, user_id)
     )
 
 def get_total_collection_value(user_id):
@@ -236,7 +236,7 @@ def delete_owned_card(owned_id):
 
 
 def count_ownership_rows(card_id):
-    """Return how many ownership rows exist for the given card_id."""
+    """Return how many ownership rows exist globally for the given card_id (used for catalog cascade cleanup)."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) AS cnt FROM owned_cards WHERE card_id = ?", (card_id,))
