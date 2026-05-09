@@ -188,7 +188,7 @@ def update_owned(owned_id: int, body: UpdateOwnedRequest, user_id: int = Depends
 @app.delete("/collection/owned/{owned_id}")
 def delete_owned(owned_id: int, user_id: int = Depends(auth.get_current_user)):
     """Delete an ownership row. Cascades: if it was the last row for that card, also delete the card."""
-    card_id = db.delete_owned_card(owned_id)
+    card_id = db.delete_owned_card(owned_id, user_id)
     if card_id is None:
         return {"status": "not_found"}
 
