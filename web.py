@@ -1,11 +1,9 @@
 import os
-import secrets
 import sqlite3
 
-from fastapi import FastAPI, HTTPException, Depends, Request, Response
+from fastapi import FastAPI, HTTPException, Depends, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from starlette.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel, EmailStr, Field
 from dotenv import load_dotenv
 
@@ -19,10 +17,7 @@ load_dotenv()
 db.init_db()
 db.run_migrations()
 
-EDIT_PASSWORD = os.environ.get("EDIT_PASSWORD", "")
-SESSION_SECRET = os.environ.get("SESSION_SECRET") or secrets.token_hex(32)
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
-
 
 class AcquireRequest(BaseModel):
     card_id: str
@@ -30,7 +25,6 @@ class AcquireRequest(BaseModel):
     purchase_price: float | None = None
     condition: str | None = None
     acquired_date: str | None = None
-
 
 class LoginRequest(BaseModel):
     identifier: str  # username or email
@@ -41,19 +35,13 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
 
+class UpdateOwnedRequest(BaseModel):
+    quantity: int
+    purchase_price: float | None = None
+    condition: str
+    acquired_date: str | None = None
+
 app = FastAPI()
-
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=SESSION_SECRET,
-    same_site="lax",
-    https_only=COOKIE_SECURE,
-    max_age=60 * 60 * 24 * 30,
-)
-
-def require_auth(request: Request):
-    if not request.session.get("authed"):
-        raise HTTPException(status_code=401, detail="Login required")
 
 @app.post("/auth/logout")
 def logout(response: Response):
@@ -65,7 +53,6 @@ def logout(response: Response):
     )
     return {"status": "ok"}
 
-
 @app.get("/auth/status")
 def auth_status(user_id: int | None = Depends(auth.get_optional_user)):
     """Return current user info if authenticated, or null."""
@@ -76,17 +63,14 @@ def auth_status(user_id: int | None = Depends(auth.get_optional_user)):
         return {"user": None}  
     return {"user": {"user_id": user["user_id"], "username": user["username"], "email": user["email"]}}
 
-
 @app.get("/")
 def home():
     return FileResponse("static/index.html")
-
 
 @app.get("/cards")
 def list_cards():
     rows = db.get_all_cards()
     return [dict(row) for row in rows]
-
 
 @app.get("/cards/{card_id}")
 def get_card(card_id: str):
@@ -107,7 +91,6 @@ def total_value(user_id: int = Depends(auth.get_current_user)):
 @app.get("/stats/total-spent")
 def total_spent(user_id: int = Depends(auth.get_current_user)):
     return {"total_spent": db.get_total_amount_spent(user_id)}
-
 
 @app.get("/stats/by-set")
 def by_set(user_id: int = Depends(auth.get_current_user)):
@@ -164,12 +147,6 @@ def acquire(request: AcquireRequest, user_id: int = Depends(auth.get_current_use
     )
     return {"status": "ok"}
 
-class UpdateOwnedRequest(BaseModel):
-    quantity: int
-    purchase_price: float | None = None
-    condition: str
-    acquired_date: str | None = None
-
 @app.patch("/collection/owned/{owned_id}")
 def update_owned(owned_id: int, body: UpdateOwnedRequest, user_id: int = Depends(auth.get_current_user)):
     """Update an existing ownership row."""
@@ -212,11 +189,9 @@ def filter_types():
 def filter_subtypes():
     return api.get_subtypes()
 
-
 @app.get("/api/filters/supertypes")
 def filter_supertypes():
     return api.get_supertypes()
-
 
 @app.get("/api/filters/rarities")
 def filter_rarities():
