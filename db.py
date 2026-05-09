@@ -158,14 +158,15 @@ def update_card_price(card_id, market_price, price_updated_at):
     conn.commit()
     conn.close()
 
-def get_total_amount_spent():
-    """Return the total amount of money spent on the collection (purchase prices)."""
+def get_total_amount_spent(user_id):
+    """Return the total amount of money spent on the user_id's collection (purchase prices) ."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT SUM(purchase_price * quantity) AS total_spent
         FROM owned_cards
-    """)
+        WHERE owned_cards.user_id = ?
+    """, (user_id,))
     row = cursor.fetchone()
     conn.close()
     return row["total_spent"] or 0
