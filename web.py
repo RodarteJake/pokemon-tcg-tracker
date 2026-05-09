@@ -105,8 +105,8 @@ def total_value(user_id: int = Depends(auth.get_current_user)):
     return {"total_value": db.get_total_collection_value(user_id)}
 
 @app.get("/stats/total-spent")
-def total_spent():
-    return {"total_spent": db.get_total_amount_spent()}
+def total_spent(user_id: int = Depends(auth.get_current_user)):
+    return {"total_spent": db.get_total_amount_spent(user_id)}
 
 
 @app.get("/stats/by-set")
