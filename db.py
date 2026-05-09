@@ -171,17 +171,18 @@ def get_total_amount_spent(user_id):
     conn.close()
     return row["total_spent"] or 0
 
-def get_value_by_set():
-    """Return a list of (set_name, total_value) rows, sorted by value descending."""
+def get_value_by_set(user_id):
+    """Return a list of (set_name, total_value) rows owned by the user, sorted by value descending."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT cards.set_name, SUM(cards.market_price * owned_cards.quantity) AS set_value
         FROM owned_cards
         JOIN cards ON owned_cards.card_id = cards.id
+        WHERE owned_cards.user_id = ?
         GROUP BY cards.set_name
         ORDER BY set_value DESC
-    """)
+    """, (user_id,))
     rows = cursor.fetchall()
     conn.close()
     return rows 
