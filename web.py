@@ -110,8 +110,8 @@ def total_spent(user_id: int = Depends(auth.get_current_user)):
 
 
 @app.get("/stats/by-set")
-def by_set():
-    rows = db.get_value_by_set()
+def by_set(user_id: int = Depends(auth.get_current_user)):
+    rows = db.get_value_by_set(user_id)
     return [dict(row) for row in rows]
 
 @app.get("/api/search")
