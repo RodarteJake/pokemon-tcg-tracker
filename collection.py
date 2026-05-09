@@ -2,7 +2,7 @@ import api
 import db
 
 
-def acquire_card(card_id, quantity, purchase_price, condition, acquired_date):
+def acquire_card(card_id, quantity, purchase_price, condition, acquired_date, user_id):
     """Fetch a card from the API and record that we now own it."""
     card_data = api.fetch_card_by_id(card_id)
 
@@ -31,6 +31,7 @@ def acquire_card(card_id, quantity, purchase_price, condition, acquired_date):
                 purchase_price=purchase_price,
                 condition=condition,
                 acquired_date=acquired_date,
+                user_id=user_id,
             )
     finally:        
         conn.close()

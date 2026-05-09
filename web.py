@@ -160,6 +160,7 @@ def acquire(request: AcquireRequest, user_id: int = Depends(auth.get_current_use
         purchase_price=request.purchase_price,
         condition=request.condition,
         acquired_date=request.acquired_date,
+        user_id=user_id,
     )
     return {"status": "ok"}
 
