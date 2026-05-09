@@ -199,10 +199,18 @@ def get_ownership_rows(card_id, user_id):
     conn.close()
     return rows
 
-def update_owned_card(owned_id, quantity, purchase_price, condition, acquired_date):
-    """Update an existing ownership row with new values."""
+def update_owned_card(owned_id, quantity, purchase_price, condition, acquired_date, user_id):
+    """Update an existing ownership row owned by the given user_id.
+    
+    Returns owned_id on success, or None if the row doesn't exist or doesn't belong to user_id.
+    """
     conn = get_connection()
     cursor = conn.cursor()
+    cursor.execute("SELECT user_id FROM owned_cards WHERE id = ?", (owned_id,))
+    row = cursor.fetchone()
+    if row is None or row["user_id"] != user_id:
+        conn.close()
+        return None
     cursor.execute(
         """
         UPDATE owned_cards
@@ -216,6 +224,7 @@ def update_owned_card(owned_id, quantity, purchase_price, condition, acquired_da
     )
     conn.commit()
     conn.close()
+    return owned_id
 
 
 def delete_owned_card(owned_id):

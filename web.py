@@ -173,13 +173,16 @@ class UpdateOwnedRequest(BaseModel):
 @app.patch("/collection/owned/{owned_id}")
 def update_owned(owned_id: int, body: UpdateOwnedRequest, user_id: int = Depends(auth.get_current_user)):
     """Update an existing ownership row."""
-    db.update_owned_card(
+    result = db.update_owned_card(
         owned_id=owned_id,
         quantity=body.quantity,
         purchase_price=body.purchase_price,
         condition=body.condition,
         acquired_date=body.acquired_date,
+        user_id=user_id,
     )
+    if result is None:
+        raise HTTPException(status_code=404, detail="Owned card not found")
     return {"status": "ok"}
 
 @app.delete("/collection/owned/{owned_id}")
