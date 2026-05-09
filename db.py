@@ -227,18 +227,18 @@ def update_owned_card(owned_id, quantity, purchase_price, condition, acquired_da
     return owned_id
 
 
-def delete_owned_card(owned_id):
-    """Delete an ownership row by id. Returns the card_id of the deleted row, for cascade logic."""
+def delete_owned_card(owned_id, user_id):
+    """Delete an ownership row by id and user_id. Returns the card_id of the deleted row, for cascade logic."""
     conn = get_connection()
     cursor = conn.cursor()
     # Find the card_id first so caller can decide whether to cascade
-    cursor.execute("SELECT card_id FROM owned_cards WHERE id = ?", (owned_id,))
+    cursor.execute("SELECT card_id FROM owned_cards WHERE id = ? AND user_id = ?", (owned_id, user_id))
     row = cursor.fetchone()
     if row is None:
         conn.close()
         return None
     card_id = row["card_id"]
-    cursor.execute("DELETE FROM owned_cards WHERE id = ?", (owned_id,))
+    cursor.execute("DELETE FROM owned_cards WHERE id = ? AND user_id = ?", (owned_id, user_id))
     conn.commit()
     conn.close()
     return card_id
