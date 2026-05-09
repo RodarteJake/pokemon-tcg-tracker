@@ -129,15 +129,16 @@ def add_owned_card(conn, card_id, quantity, purchase_price, condition, acquired_
         (card_id, quantity, purchase_price, condition, acquired_date)
     )
 
-def get_total_collection_value():
-    """Return the total current market value of the entire collection."""
+def get_total_collection_value(user_id):
+    """Return the total current market value of the given user's collection."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT SUM(cards.market_price * owned_cards.quantity) AS total_value
         FROM owned_cards
         JOIN cards ON owned_cards.card_id = cards.id
-    """)
+        WHERE owned_cards.user_id = ?
+    """, (user_id,))
     row = cursor.fetchone()
     conn.close()
     return row["total_value"] or 0
