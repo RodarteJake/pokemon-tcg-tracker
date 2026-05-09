@@ -96,9 +96,9 @@ def get_card(card_id: str):
     return dict(row)
 
 @app.get("/cards/{card_id}/ownership")
-def card_ownership(card_id: str):
+def card_ownership(card_id: str, user_id: int = Depends(auth.get_current_user)):
     """Return all ownership rows for a given card."""
-    return db.get_ownership_rows(card_id)
+    return db.get_ownership_rows(card_id, user_id)
 
 @app.get("/stats/total-value")
 def total_value(user_id: int = Depends(auth.get_current_user)):
