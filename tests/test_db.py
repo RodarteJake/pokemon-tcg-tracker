@@ -24,7 +24,8 @@ def test_add_card_round_trip(fresh_db):
     assert row["name"] == "Charizard"
     assert row["market_price"] == 350.00
 
-def test_total_collection_value_multiplies_price_by_quantity(fresh_db):
+def test_total_collection_value_multiplies_price_by_quantity(fresh_db, user_factory):
+    user_id = user_factory("testuser")
     conn = db.get_connection()
     db.add_card(
         conn,
@@ -55,6 +56,7 @@ def test_total_collection_value_multiplies_price_by_quantity(fresh_db):
         purchase_price=300.00,
         condition="Near Mint",
         acquired_date="2026-05-01",
+        user_id=user_id,
     )
     db.add_owned_card(
         conn,
@@ -63,11 +65,12 @@ def test_total_collection_value_multiplies_price_by_quantity(fresh_db):
         purchase_price=150.00,  
         condition="Lightly Played",
         acquired_date="2026-05-02",
+        user_id=user_id,
     )
     conn.commit()
     conn.close()
 
-    total_value = db.get_total_collection_value()
+    total_value = db.get_total_collection_value(user_id)
     expected_value = (350.00 * 2) + (200.00 * 3)  # $700 + $600 = $1300
     assert total_value == pytest.approx(expected_value)
 
@@ -110,7 +113,8 @@ def test_add_card_upsert(fresh_db):
     conn.close()
     assert count == 1
 
-def test_fk_violation_on_owned_cards(fresh_db):
+def test_fk_violation_on_owned_cards(fresh_db, user_factory):
+    user_id = user_factory("testuser")
     conn = db.get_connection()
     with pytest.raises(sqlite3.IntegrityError):
         db.add_owned_card(
@@ -120,5 +124,48 @@ def test_fk_violation_on_owned_cards(fresh_db):
             purchase_price=100.00,
             condition="Near Mint",
             acquired_date="2026-05-01",
+            user_id=user_id,
         )
     conn.close()
+
+def test_fk_violation_on_owned_cards_bad_card(fresh_db, user_factory):
+    # Real user, fake card — only the card FK can fire
+    user_id = user_factory("testuser")
+    conn = db.get_connection()
+    with pytest.raises(sqlite3.IntegrityError):
+        db.add_owned_card(
+            conn,
+            card_id="nonexistent-card",
+            quantity=1,
+            purchase_price=100.00,
+            condition="Near Mint",
+            acquired_date="2026-05-01",
+            user_id=user_id,
+        )
+    conn.close()
+
+def test_fk_violation_on_owned_cards_bad_user(fresh_db):
+    # Real card, fake user — only the user FK can fire
+    conn = db.get_connection()
+    db.add_card(
+        conn,
+        card_id="base1-4",
+        name="Charizard",
+        set_name="Base Set",
+        number="4",
+        rarity="Holo Rare",
+        market_price=350.00,
+        price_updated_at="2026-05-07",
+        image_url="https://example.com/charizard.png",
+    )
+    with pytest.raises(sqlite3.IntegrityError):
+        db.add_owned_card(
+            conn,
+            card_id="base1-4",
+            quantity=1,
+            purchase_price=100.00,
+            condition="Near Mint",
+            acquired_date="2026-05-01",
+            user_id=999,  # Nonexistent user ID
+        )
+    conn.close()    
