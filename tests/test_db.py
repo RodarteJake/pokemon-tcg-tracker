@@ -113,21 +113,6 @@ def test_add_card_upsert(fresh_db):
     conn.close()
     assert count == 1
 
-def test_fk_violation_on_owned_cards(fresh_db, user_factory):
-    user_id = user_factory("testuser")
-    conn = db.get_connection()
-    with pytest.raises(sqlite3.IntegrityError):
-        db.add_owned_card(
-            conn,
-            card_id="nonexistent-card",
-            quantity=1,
-            purchase_price=100.00,
-            condition="Near Mint",
-            acquired_date="2026-05-01",
-            user_id=user_id,
-        )
-    conn.close()
-
 def test_fk_violation_on_owned_cards_bad_card(fresh_db, user_factory):
     # Real user, fake card — only the card FK can fire
     user_id = user_factory("testuser")
