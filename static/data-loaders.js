@@ -26,7 +26,7 @@ export async function refreshPrices() {
   }
 }
 
-function renderLoadError(container, retryFn) {
+export function renderLoadError(container, retryFn) {
   container.innerHTML = `
     <div class="load-error">
       <div class="load-error-message">
