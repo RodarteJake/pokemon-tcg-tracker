@@ -1,6 +1,5 @@
 import { createDropdown } from "/static/searchable-dropdown.js";
 import {
-  setAuthed,
   initAuth,
   openLogin,
   closeLogin,
@@ -18,7 +17,6 @@ import {
   deleteOwnedRow,
   saveOwnedEdit,
 } from "/static/edit-collection.js";
-
 import { doSearch, clearFilters, initDropdowns } from "/static/search.js";
 
 document.getElementById("search-button").addEventListener("click", () => doSearch(true));
@@ -60,6 +58,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.getElementById("login-button").addEventListener("click", openLogin);
+
 document.getElementById("login-close").addEventListener("click", closeLogin);
 
 document.getElementById("login-overlay").addEventListener("click", (e) => {
@@ -67,6 +66,7 @@ document.getElementById("login-overlay").addEventListener("click", (e) => {
 });
 
 document.getElementById("login-form").addEventListener("submit", handleLoginSubmit);
+
 document.getElementById("logout-button").addEventListener("click", handleLogoutClick);
 
 document.getElementById("cards-container").addEventListener("click", (e) => {
