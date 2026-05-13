@@ -113,5 +113,4 @@ document.getElementById("detail-ownership-list").addEventListener("click", (e) =
 // -------- Initial load --------
 
 initAuth();
-refreshAll();
 initDropdowns();

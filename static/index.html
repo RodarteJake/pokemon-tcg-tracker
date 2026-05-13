@@ -90,22 +90,22 @@
 
     <div id="pagination" class="pagination"></div>
 
-    <div class="price-status" id="price-status">
+    <div class="price-status auth-required" id="price-status">
       <span class="price-status-label">
         Prices last updated: <span id="price-status-date">…</span>
       </span>
-      <button id="refresh-prices-button" class="auth-required">Refresh prices</button>
+      <button id="refresh-prices-button">Refresh prices</button>
     </div>
 
-    <div class="stats-bar" id="stats-bar">Loading stats...</div>
+    <div class="stats-bar auth-required" id="stats-bar">Loading stats...</div>
 
-    <h2 id="by-set-header">Value by Set</h2>
-    <div class="by-set" id="by-set">Loading...</div>
+    <h2 id="by-set-header" class="auth-required">Value by Set</h2>
+    <div class="by-set auth-required" id="by-set">Loading...</div>
 
-    <h2 id="cards-header">Cards</h2>
-    <div id="cards-container">Loading...</div>
+    <h2 id="cards-header" class="auth-required">Cards</h2>
+    <div id="cards-container" class="auth-required">Loading...</div>
 
-    <div id="empty-state">
+    <div id="empty-state" class="auth-required">
       <div class="empty-icon">📭</div>
       <div class="empty-title">Your collection is empty</div>
       <div class="empty-subtitle">Search for a card above and click "Add to Collection" to get started.</div>
