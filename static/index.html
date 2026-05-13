@@ -149,16 +149,43 @@
   <div id="login-overlay">
     <div id="login-panel">
       <button id="login-close">×</button>
-      <h2 class="login-title">Log in to edit</h2>
-      <p class="login-subtitle">Enter the editor password to add, edit, or delete cards.</p>
+      <h2 id="auth-modal-title" class="login-title">Log in</h2>
+      <p id="auth-modal-subtitle" class="login-subtitle">Welcome back.</p>
+
       <form id="login-form">
+        <label>
+          Username or email
+          <input type="text" id="login-identifier" autocomplete="username" required>
+        </label>
         <label>
           Password
           <input type="password" id="login-password" autocomplete="current-password" required>
         </label>
-        <div id="login-error" class="login-error"></div>
         <button type="submit" id="login-submit">Log in</button>
       </form>
+
+      <form id="register-form" style="display: none;">
+        <label>
+          Username
+          <input type="text" id="register-username" autocomplete="username" required>
+        </label>
+        <label>
+          Email
+          <input type="email" id="register-email" autocomplete="email" required>
+        </label>
+        <label>
+          Password
+          <input type="password" id="register-password" autocomplete="new-password" required>
+        </label>
+        <button type="submit" id="register-submit">Register</button>
+      </form>
+
+      <div id="login-error" class="login-error"></div>
+
+      <p class="auth-modal-footer">
+        <span id="auth-modal-footer-prompt">No account?</span>
+        <button id="auth-modal-toggle" type="button" class="auth-link">Register</button>
+      </p>
     </div>
   </div>
 
