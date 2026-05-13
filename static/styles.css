@@ -1084,7 +1084,7 @@ body.authed .auth-only-loggedout { display: none !important; }
   color: #94a3b8;
 }
 
-#login-form label {
+#login-panel label {
   display: block;
   font-size: 12px;
   color: #94a3b8;
@@ -1094,7 +1094,7 @@ body.authed .auth-only-loggedout { display: none !important; }
   margin-bottom: 16px;
 }
 
-#login-form input {
+#login-panel input {
   display: block;
   width: 100%;
   margin-top: 6px;
@@ -1111,7 +1111,7 @@ body.authed .auth-only-loggedout { display: none !important; }
   font-weight: 400;
 }
 
-#login-form input:focus { border-color: #38bdf8; }
+#login-panel input:focus { border-color: #38bdf8; }
 
 .login-error {
   font-size: 13px;
@@ -1120,7 +1120,7 @@ body.authed .auth-only-loggedout { display: none !important; }
   min-height: 18px;
 }
 
-#login-submit {
+#login-panel button[type="submit"] {
   width: 100%;
   background: #38bdf8;
   color: #0f172a;
@@ -1133,9 +1133,9 @@ body.authed .auth-only-loggedout { display: none !important; }
   cursor: pointer;
 }
 
-#login-submit:hover { background: #0ea5e9; }
+#login-panel button[type="submit"]:hover { background: #0ea5e9; }
 
-#login-submit:disabled {
+#login-panel button[type="submit"]:disabled {
   opacity: 0.5;
   cursor: wait;
 }

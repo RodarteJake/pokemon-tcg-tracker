@@ -6,6 +6,8 @@ import {
   apiFetch,
   handleLoginSubmit,
   handleLogoutClick,
+  handleRegisterSubmit,
+  handleAuthModalToggle,
 } from "/static/auth.js";
 import { refreshAll, refreshPrices, renderLoadError } from "/static/data-loaders.js";
 import {
@@ -57,7 +59,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-document.getElementById("login-button").addEventListener("click", openLogin);
+document.getElementById("login-button").addEventListener("click", () => openLogin());
 
 document.getElementById("login-close").addEventListener("click", closeLogin);
 
@@ -68,6 +70,11 @@ document.getElementById("login-overlay").addEventListener("click", (e) => {
 document.getElementById("login-form").addEventListener("submit", handleLoginSubmit);
 
 document.getElementById("logout-button").addEventListener("click", handleLogoutClick);
+
+
+document.getElementById("register-form").addEventListener("submit", handleRegisterSubmit);
+
+document.getElementById("auth-modal-toggle").addEventListener("click", handleAuthModalToggle);
 
 document.getElementById("cards-container").addEventListener("click", (e) => {
   const cardDiv = e.target.closest(".card");

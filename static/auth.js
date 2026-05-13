@@ -1,5 +1,36 @@
 import { refreshAll } from './data-loaders.js';
 
+const AUTH_MODAL_MODES = {
+  login: {
+    title: "Log in",
+    subtitle: "Welcome back.",
+    footerPrompt: "No account?",
+    toggleText: "Register",
+    visibleForm: "login-form",
+    hiddenForm: "register-form",
+    firstField: "login-identifier",  
+  },
+  register: {
+    title: "Create an account",
+    subtitle: "Start tracking them all.",
+    footerPrompt: "Have an account?",
+    toggleText: "Log in",
+    visibleForm: "register-form",
+    hiddenForm: "login-form",
+    firstField: "register-username",  
+  },
+};
+
+function setAuthModalMode(mode) {
+  const config = AUTH_MODAL_MODES[mode];
+  document.getElementById("auth-modal-title").textContent = config.title;
+  document.getElementById("auth-modal-subtitle").textContent = config.subtitle;
+  document.getElementById("auth-modal-footer-prompt").textContent = config.footerPrompt;      
+  document.getElementById("auth-modal-toggle").textContent = config.toggleText;
+  document.getElementById(config.visibleForm).style.display = "";
+  document.getElementById(config.hiddenForm).style.display = "none";
+}
+
 let currentUser = null;
 
 export const getCurrentUser = () => currentUser ? { ...currentUser } : null;
@@ -35,11 +66,12 @@ export async function initAuth() {
   }
 }
 
-export function openLogin() {
+export function openLogin(mode = "login") {
+  setAuthModalMode(mode);
   document.getElementById("login-error").textContent = "";
-  document.getElementById("login-password").value = "";
   document.getElementById("login-overlay").classList.add("open");
-  setTimeout(() => document.getElementById("login-password").focus(), 0);
+  const firstField = AUTH_MODAL_MODES[mode].firstField;
+  setTimeout(() => document.getElementById(firstField).focus(), 0);
 }
 
 export function closeLogin() {
@@ -62,6 +94,7 @@ export async function handleLoginSubmit(e) {
   e.preventDefault();
   const submitBtn = document.getElementById("login-submit");
   const errorEl = document.getElementById("login-error");
+  const identifier = document.getElementById("login-identifier").value;
   const password = document.getElementById("login-password").value;
 
   errorEl.textContent = "";
@@ -72,18 +105,15 @@ export async function handleLoginSubmit(e) {
     const response = await fetch("/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ identifier, password }),
     });
     if (response.status === 401) {
-      errorEl.textContent = "Wrong password.";
-      return;
-    }
-    if (response.status === 503) {
-      errorEl.textContent = "Editing is not configured on this server.";
+      errorEl.textContent = "Invalid username or email or password.";
       return;
     }
     if (!response.ok) throw new Error("Server error");
-    setCurrentUser({ username: "temp" });
+    const user = await response.json();
+    setCurrentUser(user);
     closeLogin();
   } catch (err) {
     errorEl.textContent = "Couldn't log in. Try again.";
@@ -91,6 +121,50 @@ export async function handleLoginSubmit(e) {
     submitBtn.disabled = false;
     submitBtn.textContent = "Log in";
   }
+}
+
+export async function handleRegisterSubmit(e) {
+  e.preventDefault();
+  const submitBtn = document.getElementById("register-submit");
+  const errorEl = document.getElementById("login-error");
+  const username = document.getElementById("register-username").value;
+  const email = document.getElementById("register-email").value;
+  const password = document.getElementById("register-password").value;
+
+  errorEl.textContent = "";
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Registering…";
+
+  try {
+    const response = await fetch("/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password }),
+    });
+    if (response.status === 409) {
+      errorEl.textContent = "Username or email already taken.";
+      return;
+    }
+    if (response.status === 422) {
+      errorEl.textContent = "Check your username, email, and password.";
+      return;
+    }
+    if (!response.ok) throw new Error("Server error");
+    const user = await response.json();
+    setCurrentUser(user);
+    closeLogin();
+  } catch (err) {
+    errorEl.textContent = "Couldn't register. Try again.";
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Register";
+  }
+}
+
+export function handleAuthModalToggle() {
+  const newMode = document.getElementById("login-form").style.display === "none" ? "login" : "register";
+  document.getElementById("login-error").textContent = "";
+  setAuthModalMode(newMode);
 }
 
 export async function handleLogoutClick() {
