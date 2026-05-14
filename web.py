@@ -84,6 +84,12 @@ def card_ownership(card_id: str, user_id: int = Depends(auth.get_current_user)):
     """Return all ownership rows for a given card."""
     return db.get_ownership_rows(card_id, user_id)
 
+@app.get("/collection")
+def list_owned_cards(user_id: int = Depends(auth.get_current_user)):
+    """Return all owned cards for the current user, including metadata and ownership details."""
+    rows = db.get_owned_cards(user_id)
+    return [dict(row) for row in rows]  
+
 @app.get("/stats/total-value")
 def total_value(user_id: int = Depends(auth.get_current_user)):
     return {"total_value": db.get_total_collection_value(user_id)}

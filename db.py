@@ -70,6 +70,22 @@ def get_all_cards():
     conn.close()
     return rows
 
+def get_owned_cards(user_id):
+    """Return all owned cards for a given user, including metadata and ownership details."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT owned_cards.id as owned_id, owned_cards.card_id, owned_cards.quantity, owned_cards.purchase_price, owned_cards.condition, owned_cards.acquired_date, 
+        cards.name, cards.set_name, cards.number, cards.rarity, cards.market_price, cards.image_url
+        FROM owned_cards
+        JOIN cards ON owned_cards.card_id = cards.id
+        WHERE owned_cards.user_id = ?
+        ORDER BY owned_cards.acquired_date DESC
+    """, (user_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
 def get_card_by_id(card_id):
     """Return a single card by its ID, or None if not found."""
     conn = get_connection()
