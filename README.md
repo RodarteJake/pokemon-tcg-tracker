@@ -2,7 +2,7 @@
 
 [Live Demo](https://pokemon-tcg-tracker.fly.dev/)
 
-A personal Pokémon Trading Card Game collection tracker with live pricing, statistics, and a search-driven acquisition flow. Built as a full-stack project to learn SQL, REST APIs, and modern web fundamentals. 
+A Pokémon Trading Card Game collection tracker with live pricing, statistics, and a search-driven acquisition flow. Built as a full-stack project to learn SQL, REST APIs, and modern web fundamentals.
 
 Used Claude as a pair-programmer and tutor. I made the architecture and implementation decisions; Claude helped me reason through tradeoffs, catch bugs, and turn my notes into clear issues and documentation.
 
@@ -11,7 +11,7 @@ Used Claude as a pair-programmer and tutor. I made the architecture and implemen
 - **Live pricing** — fetches current market values from the Pokémon TCG API
 - **Collection dashboard** — total value, total spent, gain/loss, and value-by-set breakdown
 - **Search & acquire** — search the entire Pokémon TCG catalog with paginated results, click to add cards to your collection
-- **Auth** — visitors get read-only access; log in with a password to add, edit, delete, or refresh prices
+- **Multi-user auth** — register an account, log in with username or email, JWT stored in HttpOnly cookies
 - **Local-first storage** — SQLite database, no cloud dependencies
 - **Resilient price refresh** — batch refresh handles individual API failures without aborting
 
@@ -32,70 +32,39 @@ Used Claude as a pair-programmer and tutor. I made the architecture and implemen
 ## How it's built
 
 **Backend**
-- Python 3.11
+- Python 3.12
 - FastAPI — REST API framework
-- SQLite — local database
+- SQLite — local database with a versioned migration system
+- `bcrypt` + `PyJWT` — password hashing and JWT auth
 - `requests` — Pokémon TCG API client
 
 **Frontend**
 - Vanilla HTML / CSS / JavaScript (no framework)
+- ES modules — `main.js`, `auth.js`, `data-loaders.js`, `edit-collection.js`, `search.js`, `searchable-dropdown.js`
 - Inter + JetBrains Mono via Google Fonts
 - CSS Grid for responsive layout
 
 **Architecture**
 - `db.py` — database access layer
+- `auth.py` — password hashing, JWT creation and verification, FastAPI auth dependencies
 - `api.py` — Pokémon TCG API client
 - `collection.py` — service layer bridging the API and the database
 - `web.py` — FastAPI HTTP layer
-- `seed.py` — reproducible test data setup
-- `static/index.html` — single-page frontend
+- `migrations/` — versioned SQL migration files
 
-## Running locally
-
-Requires Python 3.11+ installed.
-
-```bash
-# Clone the repo
-git clone https://github.com/RodarteJake/pokemon-tcg-tracker.git
-cd pokemon-tcg-tracker
-
-# Set up a virtual environment
-python -m venv venv
-.\venv\Scripts\Activate.ps1   # On Windows
-# source venv/bin/activate    # On macOS/Linux
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Seed the database with sample data
-python seed.py
-
-# Run the web server
-uvicorn web:app --reload
-```
-
-Then open http://127.0.0.1:8000 in your browser.
+**Data model**
+- `cards` — shared card metadata (name, set, image, market price). Every Pikachu is the same Pikachu regardless of who owns it.
+- `owned_cards` — per-user ownership rows (quantity, condition, purchase price, acquired date)
+- `users` — accounts with hashed passwords
 
 ## Auth
 
-Visitors get read-only access. To add, edit, delete, or refresh prices, log in with a single shared password.
+Register an account at the live demo. Login accepts either username or email. JWT issued on login/register, stored in an HttpOnly cookie.
 
 Required env vars:
 
-- `EDIT_PASSWORD` — the password the editor types in. If unset, login is disabled and the site is read-only.
-- `SESSION_SECRET` — used to sign the session cookie. If unset, a random one is generated at startup (sessions expire on restart, fine for dev).
+- `JWT_SECRET` — used to sign JWT tokens. Generate with `python -c "import secrets; print(secrets.token_urlsafe(64))"`.
 - `COOKIE_SECURE` — set to `true` in production (HTTPS-only cookie). Defaults to `false` for local dev.
-
-For local dev, `EDIT_PASSWORD=hunter2 uvicorn web:app --reload` is enough.
-
-For Fly:
-
-```bash
-flyctl secrets set EDIT_PASSWORD='<long random password>'
-flyctl secrets set SESSION_SECRET="$(python -c 'import secrets; print(secrets.token_hex(32))')"
-```
-
-`COOKIE_SECURE=true` is already set in `fly.toml`.
 
 ## Data sources
 
