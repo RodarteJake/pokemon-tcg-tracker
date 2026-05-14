@@ -160,7 +160,7 @@ async function loadCards() {
     </div>
   `).join("");
   try {
-  const response = await fetch("/cards");
+  const response = await fetch("/collection");
   if (!response.ok) throw new Error("Failed to fetch");
   const cards = await response.json();
   container.innerHTML = "";
@@ -172,7 +172,8 @@ async function loadCards() {
   for (const card of cards) {
     const div = document.createElement("div");
     div.className = "card";
-    div.dataset.cardId = card.id;
+    div.dataset.ownedId = card.owned_id;
+    div.dataset.cardId = card.card_id;
     div.innerHTML = `
       <img src="${card.image_url}" alt="" width="240" height="330" loading="lazy" decoding="async">
       <div class="card-name">${card.name}</div>
