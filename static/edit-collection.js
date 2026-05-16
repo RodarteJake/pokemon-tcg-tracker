@@ -13,6 +13,7 @@ export function openAcquireModal(card) {
       <div class="preview-set">${card.set.name} · #${card.number}</div>
     </div>
   `;
+  document.getElementById("acquire-form").reset();
   document.getElementById("form-date").value = new Date().toISOString().slice(0, 10);
   document.getElementById("modal-overlay").classList.add("open");
 }
