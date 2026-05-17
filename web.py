@@ -1,6 +1,7 @@
 import os
 import sqlite3
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -13,8 +14,6 @@ import api
 import collection
 
 load_dotenv()
-
-db.run_migrations()
 
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
 
@@ -40,7 +39,18 @@ class UpdateOwnedRequest(BaseModel):
     condition: str
     acquired_date: str | None = None
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Run startup and shutdown work for the FastAPI app.
+
+    Migrations run once on server boot. Importing this module (e.g., from
+    tests or scripts) does not trigger them.
+    """
+    db.run_migrations() 
+    yield
+    # No special shutdown logic needed for now
+
+app = FastAPI(lifespan=lifespan)
 
 @app.post("/auth/logout")
 def logout(response: Response):
