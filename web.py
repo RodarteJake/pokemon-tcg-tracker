@@ -14,7 +14,6 @@ import collection
 
 load_dotenv()
 
-db.init_db()
 db.run_migrations()
 
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
