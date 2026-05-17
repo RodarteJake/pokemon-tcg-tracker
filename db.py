@@ -3,37 +3,6 @@ import os
 
 DB_PATH = os.environ.get("DB_PATH", "collection.db")
 
-def init_db():
-    """Create tables if they don't exist. Safe to run on every startup."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS cards (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            set_name TEXT,
-            number TEXT,
-            rarity TEXT,
-            market_price REAL,
-            price_updated_at TEXT,
-            image_url TEXT
-        );
-    """)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS owned_cards (
-            id INTEGER PRIMARY KEY,
-            card_id TEXT NOT NULL,
-            quantity INTEGER NOT NULL DEFAULT 1,
-            purchase_price REAL,
-            condition TEXT,
-            acquired_date TEXT,
-            FOREIGN KEY (card_id) REFERENCES cards(id),
-            CHECK (quantity > 0)
-        );
-    """)
-    conn.commit()
-    conn.close()
-
 def get_connection():
     """Open a connection to the database with row_factory set."""
     conn = sqlite3.connect(DB_PATH)
