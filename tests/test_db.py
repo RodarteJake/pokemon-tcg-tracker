@@ -24,7 +24,7 @@ def test_add_card_round_trip(fresh_db):
     assert row["name"] == "Charizard"
     assert row["market_price"] == 350.00
 
-def test_total_collection_value_multiplies_price_by_quantity(fresh_db, user_factory):
+def test_total_collection_value_applies_condition_multipliers(fresh_db, user_factory):
     user_id = user_factory("testuser")
     conn = db.get_connection()
     db.add_card(
@@ -71,8 +71,94 @@ def test_total_collection_value_multiplies_price_by_quantity(fresh_db, user_fact
     conn.close()
 
     total_value = db.get_total_collection_value(user_id)
-    expected_value = (350.00 * 2) + (200.00 * 3)  # $700 + $600 = $1300
+    expected_value = (350.00 * 2 * 1.0) + (200.00 * 3 * 0.85)  # $700 + $510 = $1210
     assert total_value == pytest.approx(expected_value)
+
+def test_total_collection_value_unknown_condition_defaults_to_full_value(fresh_db, user_factory):
+    user_id = user_factory("testuser")
+    conn = db.get_connection()
+    db.add_card(
+        conn,
+        card_id="base1-4",
+        name="Charizard",
+        set_name="Base Set",
+        number="4",
+        rarity="Holo Rare",
+        market_price=350.00,
+        price_updated_at="2026-05-07T00:00:00Z",
+        image_url="https://example.com/charizard.png",
+    )
+    db.add_owned_card(
+        conn,
+        card_id="base1-4",
+        quantity=1,
+        purchase_price=300.00,
+        condition="Unknown Condition",  # Not in CONDITION_VALUE_PERCENTS
+        acquired_date="2026-05-01",
+        user_id=user_id,
+    )
+    conn.commit()
+    conn.close()
+
+    total_value = db.get_total_collection_value(user_id)
+    expected_value = 350.00 * 1 * 1.0  # Should default to full value
+    assert total_value == pytest.approx(expected_value)
+
+def test_get_value_by_set(fresh_db, user_factory):
+    user_id = user_factory("testuser")
+    conn = db.get_connection()
+    db.add_card(
+        conn,
+        card_id="base1-4",
+        name="Charizard",
+        set_name="Base Set",
+        number="4",
+        rarity="Holo Rare",
+        market_price=350.00,
+        price_updated_at="2026-05-07T00:00:00Z",
+        image_url="https://example.com/charizard.png",
+    )
+    db.add_card(
+        conn,
+        card_id="jung1-1",
+        name="Venusaur",
+        set_name="Jungle Set",
+        number="1",
+        rarity="Rare",
+        market_price=200.00,
+        price_updated_at="2026-05-07T00:00:00Z",
+        image_url="https://example.com/venusaur.png",
+    )
+    db.add_owned_card(
+        conn,
+        card_id="base1-4",
+        quantity=2,
+        purchase_price=300.00,
+        condition="Near Mint",
+        acquired_date="2026-05-01",
+        user_id=user_id,
+    )
+    db.add_owned_card(
+        conn,
+        card_id="jung1-1",
+        quantity=1,
+        purchase_price=180.00,
+        condition="Lightly Played",
+        acquired_date="2026-05-02",
+        user_id=user_id,
+    )
+    conn.commit()
+    conn.close()
+
+    values_by_set = db.get_value_by_set(user_id)
+
+    assert isinstance(values_by_set, list)
+    assert len(values_by_set) == 2
+    assert values_by_set[0]["set_name"] == "Base Set"
+    assert values_by_set[1]["set_name"] == "Jungle Set"
+    assert values_by_set[0]["set_value"] == pytest.approx(350.00 * 2 * 1.0)
+    assert values_by_set[1]["set_value"] == pytest.approx(200.00 * 1 * 0.85)
+    assert values_by_set[0]["set_value"] > values_by_set[1]["set_value"]
 
 def test_add_card_upsert(fresh_db):
     conn = db.get_connection()
