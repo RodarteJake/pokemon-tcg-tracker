@@ -8,6 +8,7 @@ import {
   handleLogoutClick,
   handleRegisterSubmit,
   handleAuthModalToggle,
+  handlePasswordToggle,
 } from "/static/auth.js";
 import { refreshAll, refreshPrices, renderLoadError } from "/static/data-loaders.js";
 import {
@@ -68,6 +69,14 @@ document.getElementById("login-overlay").addEventListener("click", (e) => {
 });
 
 document.getElementById("login-form").addEventListener("submit", handleLoginSubmit);
+
+document.getElementById("login-show-password").addEventListener("click", () => {
+  handlePasswordToggle("login-password", "login-show-password");
+});
+
+document.getElementById("register-show-password").addEventListener("click", () => {
+  handlePasswordToggle("register-password", "register-show-password");
+});
 
 document.getElementById("logout-button").addEventListener("click", handleLogoutClick);
 

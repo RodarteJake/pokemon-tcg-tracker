@@ -167,6 +167,15 @@ export function handleAuthModalToggle() {
   setAuthModalMode(newMode);
 }
 
+export function handlePasswordToggle(inputId, buttonId) {
+  const input = document.getElementById(inputId);
+  const button = document.getElementById(buttonId);
+  const type = input.type === "password" ? "text" : "password";
+  input.type = type;
+  button.ariaLabel = type === "password" ? "Show password" : "Hide password";
+  button.classList.toggle("is-visible");
+}
+
 export async function handleLogoutClick() {
   try {
     await fetch("/auth/logout", { method: "POST" });
