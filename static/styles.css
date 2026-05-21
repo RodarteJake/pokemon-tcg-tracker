@@ -1140,6 +1140,37 @@ body.authed .auth-only-loggedout { display: none !important; }
   cursor: wait;
 }
 
+.password-input-field {
+  position: relative;
+  margin-top: 6px
+}
+
+#login-panel .password-input-field input {
+  padding-right: 48px;
+  margin-top: 0;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.password-toggle .icon-eye-off { display: none; }
+.password-toggle.is-visible .icon-eye { display: none; }
+.password-toggle.is-visible .icon-eye-off { display: block; }
+
 /* --- Mobile responsiveness --- */
 @media (max-width: 600px) {
   body {
