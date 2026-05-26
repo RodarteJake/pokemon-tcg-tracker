@@ -1,5 +1,5 @@
 import { apiFetch } from "/static/auth.js";
-import { refreshAll } from "/static/data-loaders.js";
+import { refreshAll, adjustedValue } from "/static/data-loaders.js";
 
 let currentDetailCardId = null;
 let currentAcquireCard = null;
@@ -51,6 +51,10 @@ export async function openDetail(cardId) {
       `You own ${ownership.length} ${ownership.length === 1 ? "copy" : "copies"} of this card:`;
 
     for (const row of ownership) {
+      const nowValue = card.market_price !== null
+        ? adjustedValue({ market_price: card.market_price, quantity: row.quantity, condition: row.condition })
+        : null;
+
       const div = document.createElement("div");
       div.className = "ownership-row";
       div.innerHTML = `
@@ -58,7 +62,10 @@ export async function openDetail(cardId) {
           <div class="condition">${row.condition} × ${row.quantity}</div>
           <div class="meta">Acquired ${row.acquired_date || "unknown date"}</div>
         </div>
-        <div class="price">${row.purchase_price !== null ? `$${row.purchase_price.toFixed(2)}` : "—"}</div>
+        <div class="price">
+          Paid ${row.purchase_price !== null ? `$${row.purchase_price.toFixed(2)}` : "—"}
+          · Now ${nowValue !== null ? `$${nowValue.toFixed(2)}` : "—"}
+        </div>
         <div class="actions auth-required">
           <button class="icon-btn" data-owned-id="${row.id}" data-action="edit">Edit</button>
           <button class="icon-btn danger" data-owned-id="${row.id}" data-action="delete">Delete</button>
