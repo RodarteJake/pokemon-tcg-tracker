@@ -4,6 +4,7 @@ from contextlib import closing
 
 DB_PATH = os.environ.get("DB_PATH", "collection.db")
 
+# DUPLICATED in data-loaders.js — update both
 CONDITION_VALUE_PERCENTS = {
     "Near Mint": 1.0,
     "Lightly Played": 0.85,

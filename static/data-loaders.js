@@ -1,5 +1,20 @@
 import { apiFetch } from "/static/auth.js";
 
+// DUPLICATED in db.py — update both
+const CONDITION_VALUE_PERCENTS = {
+    "Near Mint": 1.0,
+    "Lightly Played": 0.85,
+    "Moderately Played": 0.65,
+    "Heavily Played": 0.45,
+    "Damaged": 0.25,
+}
+
+export function adjustedValue(row) {
+  if (row.market_price === null) return 0;
+  const conditionPercent = CONDITION_VALUE_PERCENTS[row.condition] || 1.0;
+  return row.market_price * row.quantity * conditionPercent;
+}
+
 export function refreshAll() {
   loadStats();
   loadBySet();
@@ -169,16 +184,33 @@ async function loadCards() {
   setEmptyStateVisible(isEmpty);
   if (isEmpty) return;
 
-  for (const card of cards) {
+  const groups = {};
+  for (const row of cards) {
+    if (!groups[row.card_id]) {
+      groups[row.card_id] = {
+        card_id:        row.card_id,
+        name:           row.name,
+        set_name:       row.set_name,
+        image_url:      row.image_url,
+        total_quantity: 0,
+        total_value:    0,
+      };
+    }
+    groups[row.card_id].total_quantity += row.quantity;
+    groups[row.card_id].total_value    += adjustedValue(row);
+  }
+  const grouped = Object.values(groups);
+
+  for (const card of grouped) {
     const div = document.createElement("div");
     div.className = "card";
-    div.dataset.ownedId = card.owned_id;
     div.dataset.cardId = card.card_id;
     div.innerHTML = `
       <img src="${card.image_url}" alt="" width="240" height="330" loading="lazy" decoding="async">
       <div class="card-name">${card.name}</div>
       <div class="card-set">${card.set_name}</div>
-      <div class="card-price">$${(card.market_price ?? 0).toFixed(2)}</div>
+      <div class="card-price">$${(card.total_value).toFixed(2)}</div>
+      <div class="card-quantity">× ${card.total_quantity}</div>
     `;
     container.appendChild(div);
   }
