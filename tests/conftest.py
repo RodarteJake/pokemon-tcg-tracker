@@ -1,5 +1,7 @@
 import pytest
 import db
+import os
+os.environ.setdefault("JWT_SECRET", "test-secret-not-for-prod")
 
 @pytest.fixture
 def fresh_db(tmp_path):
