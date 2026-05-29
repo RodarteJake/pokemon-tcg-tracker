@@ -1,3 +1,4 @@
+import json
 import sqlite3
 import os
 from contextlib import closing
@@ -255,3 +256,31 @@ def create_user(username: str, email: str, hashed_password: str) -> int:
             "INSERT INTO users (username, email, hashed_password) VALUES (?, ?, ?)",
             (username, email, hashed_password),
         ).lastrowid
+
+# filter cache
+
+def get_filter_cache(key:str) -> list | None:
+    """Return the cached value for the given filter key, or None if not cached."""
+    with closing(get_connection()) as conn:
+        row = conn.execute(
+            "SELECT value FROM filter_cache WHERE key = ?",
+            (key,),
+        ).fetchone()
+        if row is None:
+            return None
+        return json.loads(row["value"])
+
+
+def set_filter_cache(key: str, value: list) -> None:
+    """Cache or update the filter value for the given key. Bumps updated_at on write."""
+    with closing(get_connection()) as conn, conn:
+        conn.execute(
+            """
+            INSERT INTO filter_cache (key, value)
+            VALUES (?, ?)
+            ON CONFLICT (key) DO UPDATE SET
+                value = excluded.value,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (key, json.dumps(value)),
+        )
