@@ -190,27 +190,35 @@ def delete_owned(owned_id: int, user_id: int = Depends(auth.get_current_user)):
         return {"status": "ok", "cascade_deleted_card": True}
     return {"status": "ok", "cascade_deleted_card": False}
 
+def get_filter_or_warn(key: str) -> list:
+    """Read a filter from the cache; warn and return [] if missing."""
+    cached = db.get_filter_cache(key)
+    if cached is None:
+        print(f"WARN: filter_cache empty for key={key}")
+        return []
+    return cached
+
 @app.get("/api/filters/sets")
 def filter_sets():
-    return api.get_sets()
+    return get_filter_or_warn("sets")
 
 
 @app.get("/api/filters/types")
 def filter_types():
-    return api.get_types()
+    return get_filter_or_warn("types")
 
 
 @app.get("/api/filters/subtypes")
 def filter_subtypes():
-    return api.get_subtypes()
+    return get_filter_or_warn("subtypes")
 
 @app.get("/api/filters/supertypes")
 def filter_supertypes():
-    return api.get_supertypes()
+    return get_filter_or_warn("supertypes")
 
 @app.get("/api/filters/rarities")
 def filter_rarities():
-    return api.get_rarities()
+    return get_filter_or_warn("rarities")
 
 @app.get("/stats/last-updated")
 def last_updated():
