@@ -9,6 +9,8 @@ const CONDITION_VALUE_PERCENTS = {
     "Damaged": 0.25,
 }
 
+let collectionCards = [];
+
 export function adjustedValue(row) {
   if (row.market_price === null) return 0;
   const conditionPercent = CONDITION_VALUE_PERCENTS[row.condition] || 1.0;
@@ -173,35 +175,50 @@ async function loadCards() {
       <div class="skeleton skeleton-set"></div>
       <div class="skeleton skeleton-price"></div>
     </div>
-  `).join("");
+  `).join("");    
   try {
-  const response = await fetch("/collection");
-  if (!response.ok) throw new Error("Failed to fetch");
-  const cards = await response.json();
-  container.innerHTML = "";
+    const response = await fetch("/collection");          
+    if (!response.ok) throw new Error("Failed to fetch"); 
+    const cards = await response.json();                  
 
-  const isEmpty = cards.length === 0;
-  setEmptyStateVisible(isEmpty);
-  if (isEmpty) return;
 
-  const groups = {};
-  for (const row of cards) {
-    if (!groups[row.card_id]) {
-      groups[row.card_id] = {
-        card_id:        row.card_id,
-        name:           row.name,
-        set_name:       row.set_name,
-        image_url:      row.image_url,
-        total_quantity: 0,
-        total_value:    0,
-      };
+    const isEmpty = cards.length === 0;                  
+    setEmptyStateVisible(isEmpty);                      
+    if (isEmpty) {
+      collectionCards = [];
+      return;                                 
     }
-    groups[row.card_id].total_quantity += row.quantity;
-    groups[row.card_id].total_value    += adjustedValue(row);
-  }
-  const grouped = Object.values(groups);
 
-  for (const card of grouped) {
+    const groups = {};                                 
+    for (const row of cards) {
+      const cardId = row.card_id;
+      if (!groups[cardId]) {
+        groups[cardId] = {
+          card_id: cardId,
+          name: row.name,
+          set_name: row.set_name,
+          image_url: row.image_url,
+          total_quantity: 0,
+          total_value: 0,
+        };
+      }
+      groups[cardId].total_quantity += row.quantity;
+      groups[cardId].total_value += adjustedValue(row);
+     }                    
+    const grouped = Object.values(groups);             
+    collectionCards = grouped;
+    
+    applySort();
+
+  } catch (err) {
+    renderLoadError(container, loadCards);          
+  }
+}
+
+function renderCards(cards) {
+  const container = document.getElementById("cards-container");
+  container.innerHTML = "";
+  for (const card of cards) {
     const div = document.createElement("div");
     div.className = "card";
     div.dataset.cardId = card.card_id;
@@ -214,9 +231,6 @@ async function loadCards() {
     `;
     container.appendChild(div);
   }
-  } catch (err) {
-    renderLoadError(container, loadCards);
-  }
 }
 
 async function loadLastUpdated() {
@@ -225,4 +239,32 @@ async function loadLastUpdated() {
   const { last_updated } = await response.json();
   const el = document.getElementById("price-status-date");
   el.textContent = last_updated || "never";
+}
+
+function sortCards(data, sortBy, ascending = true) {
+  const direction = ascending ? 1 : -1;
+  const sorted = [...data];
+  switch (sortBy) {
+    case "name":
+      sorted.sort((a, b) => a.name.localeCompare(b.name) * direction);
+      break;
+    case "value":
+      sorted.sort((a, b) => (a.total_value - b.total_value) * direction);
+      break;
+    case "":
+      // Don't sort, keep original order
+      break;
+    default:
+      console.warn("Unknown sort field:", sortBy);
+  }
+  return sorted;
+}
+
+export function applySort() {
+  // grab current sort options, re-sort the existing cards, and re-render
+  // HTML needs 2 dropdowns: one for sort field (name, value, etc) and one for direction (asc/desc)
+  const sortBy = document.getElementById("sort-field").value;
+  const ascending = document.getElementById("sort-direction").value === "asc";
+  const sortedCards = sortCards(collectionCards, sortBy, ascending);
+  renderCards(sortedCards);
 }
