@@ -10,7 +10,7 @@ import {
   handleAuthModalToggle,
   handlePasswordToggle,
 } from "/static/auth.js";
-import { refreshAll, refreshPrices, renderLoadError } from "/static/data-loaders.js";
+import { refreshAll, refreshPrices, renderLoadError, applySort } from "/static/data-loaders.js";
 import {
   openAcquireModal,
   closeAcquireModal,
@@ -96,6 +96,10 @@ document.getElementById("detail-close").addEventListener("click", closeDetail);
 document.getElementById("acquire-form").addEventListener("submit", handleAcquireSubmit);
 
 document.getElementById("refresh-prices-button").addEventListener("click", refreshPrices);
+
+document.getElementById("sort-field").addEventListener("change", applySort);
+
+document.getElementById("sort-direction").addEventListener("change", applySort);
 
 document.getElementById("detail-ownership-list").addEventListener("click", (e) => {
   const button = e.target.closest(".icon-btn");

@@ -148,6 +148,29 @@ h2 {
   margin-top: 2px;
 }
 
+.sort-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+#sort-field,
+#sort-direction {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+}
+
+#sort-field:focus,
+#sort-direction:focus { border-color: #38bdf8; }
+
 /* --- Search results grid --- */
 #search-results {
   display: grid;
